@@ -1,0 +1,58 @@
+
+> web@0.1.0 build
+> next build
+
+▲ Next.js 16.3.8 (Turbopack)
+✓ Running next.config.ts took 77ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 11.9s
+  Running TypeScript ...
+  Finished TypeScript in 3.0s ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/28) ...
+  Generating static pages using 15 workers (7/28) 
+  Generating static pages using 15 workers (14/28) 
+  Generating static pages using 15 workers (21/28) 
+✓ Generating static pages using 15 workers (28/28) in 757ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /admin
+├ ƒ /adventure/[id]
+├ ○ /adventures
+├ ƒ /adventures/[id]
+├ ○ /booking
+├ ○ /confirmation
+├ ○ /dashboard
+├   /destination/[id]
+│ ├ ● /destination/rishikesh
+│ ├ ● /destination/manali
+│ ├ ● /destination/ladakh
+│ └ ● [+3 more paths]
+├ ○ /destinations
+├ ƒ /destinations/[id]
+├ ƒ /experience/[id]
+├ ○ /experiences
+├ ƒ /experiences/[id]
+├ ○ /explore
+├ ○ /itinerary
+├ ○ /login
+├ ○ /provider/dashboard
+├ ○ /provider/listings
+├ ○ /provider/register
+├ ○ /robots.txt
+├ ○ /search
+├ ○ /sitemap.xml
+├ ƒ /stay/[id]
+├ ○ /stays
+├ ƒ /stays/[id]
+└ ○ /trip-builder
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

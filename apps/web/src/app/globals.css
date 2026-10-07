@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* 
+  TRIPJUGAADU - PHASE 1 DESIGN SYSTEM 
+  Importing the strict Phase 1 visual logic into Next.js.
+  This allows us to progressively use Tailwind for new components 
+  while perfectly preserving the original Phase 1 visual intent.
+*/
+
+@import "../styles/tokens.css";
+@import "../styles/base.css";
+@import "../styles/layout.css";
+@import "../styles/components.css";
+@import "../styles/animations.css";
+@import "../styles/pages.css";
+@import "../styles/responsive.css";
+
+/* Tailwind overriding to respect Phase 1 tokens if needed */
+:root {
+  --background: var(--bg-main);
+  --foreground: var(--text-primary);
+  
+  /* Map Next.js fonts to Phase 1 variables */
+  --font-display: var(--font-bebas), "Bebas Neue", sans-serif;
+  --font-body: var(--font-inter), "Inter", sans-serif;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+}

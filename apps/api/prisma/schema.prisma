@@ -1,0 +1,417 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  PROVIDER
+  ADMIN
+}
+
+enum BookingStatus {
+  DRAFT
+  PENDING
+  PAYMENT_PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  CAPTURED
+  FAILED
+  REFUNDED
+}
+
+enum Difficulty {
+  EASY
+  EASY_MODERATE
+  MODERATE
+  MODERATE_HARD
+  EXTREME
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  phone        String?
+  role         Role      @default(USER)
+  avatarUrl    String?
+  isVerified   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  profile      Profile?
+  provider     Provider?
+  trips        Trip[]
+  bookings     Booking[]
+  reviews      Review[]
+  wishlists    Wishlist[]
+
+  @@index([email])
+}
+
+model Profile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio                 String?
+  city                String?
+  state               String?
+  country             String   @default("India")
+  preferredActivities String[]
+  travelStyle         String?
+  emergencyContact    String?
+}
+
+model Provider {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName  String
+  businessRegNo String?
+  category      String?
+  location      String?
+  status        String    @default("APPROVED")
+  phone         String?
+  panNumber     String?
+  bankAccount   String?
+  totalPayout   Int       @default(0)
+  verified      Boolean   @default(false)
+  rating        Float     @default(5.0)
+  createdAt     DateTime  @default(now())
+}
+
+model Destination {
+  id             String        @id @default(uuid())
+  slug           String        @unique
+  name           String
+  region         String
+  state          String
+  category       String
+  bestSeason     String?
+  daysRecommend  String        @default("03 Days")
+  heroImage      String
+  description    String
+  latitude       Float?
+  longitude      Float?
+  featured       Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  adventures     Adventure[]
+  stays          Stay[]
+  experiences    Experience[]
+  trips          Trip[]
+  guides         Guide[]
+
+  @@index([slug])
+  @@index([region])
+}
+
+model Adventure {
+  id               String       @id @default(uuid())
+  slug             String       @unique
+  destinationId    String
+  destination      Destination  @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  name             String
+  category         String       @default("Water")
+  difficulty       Difficulty   @default(MODERATE)
+  duration         String       @default("3–4 Hours")
+  basePrice        Int          @default(3999)
+  capacity         Int          @default(20)
+  heroImage        String
+  description      String
+  requirements     String[]
+  whatToCarry      String[]
+  whatToWear       String[]
+  safetyGuidelines String[]
+  rating           Float        @default(4.8)
+  reviewCount      Int          @default(0)
+  featured         Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+
+  @@index([slug])
+  @@index([destinationId])
+}
+
+model Stay {
+  id            String       @id @default(uuid())
+  slug          String       @unique
+  destinationId String
+  destination   Destination  @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  name          String
+  stayType      String       @default("Lodge")
+  address       String?
+  rating        Float        @default(4.7)
+  basePrice     Int          @default(5000)
+  heroImage     String
+  amenities     String[]
+  description   String
+  rooms         Room[]
+  createdAt     DateTime     @default(now())
+
+  @@index([slug])
+  @@index([destinationId])
+}
+
+model Room {
+  id            String   @id @default(uuid())
+  stayId        String
+  stay          Stay     @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  name          String
+  roomType      String
+  maxGuests     Int      @default(2)
+  pricePerNight Int
+  inventory     Int      @default(5)
+}
+
+model Experience {
+  id            String       @id @default(uuid())
+  slug          String       @unique
+  destinationId String
+  destination   Destination  @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  name          String
+  category      String
+  duration      String
+  price         Int          @default(1500)
+  heroImage     String
+  description   String
+  accentColor   String       @default("warm")
+  createdAt     DateTime     @default(now())
+
+  @@index([slug])
+  @@index([destinationId])
+}
+
+model Trip {
+  id             String      @id @default(uuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String
+  destinationId  String
+  destination    Destination @relation(fields: [destinationId], references: [id])
+  startDate      DateTime
+  endDate        DateTime
+  travelersCount Int         @default(2)
+  budgetTier     String      @default("EXPLORER")
+  readinessScore Int         @default(60)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  items          TripItem[]
+  bookings       Booking[]
+
+  @@index([userId])
+}
+
+model TripItem {
+  id            String   @id @default(uuid())
+  tripId        String
+  trip          Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  dayNumber     Int
+  orderIndex    Int
+  title         String
+  itemType      String
+  itemId        String?
+  startTime     String
+  duration      String?
+  status        String   @default("pending")
+  estimatedCost String?
+
+  @@index([tripId])
+}
+
+model Booking {
+  id             String        @id @default(uuid())
+  bookingRef     String        @unique
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tripId         String?
+  trip           Trip?         @relation(fields: [tripId], references: [id], onDelete: SetNull)
+  status         BookingStatus @default(PENDING)
+  totalAmount    Int
+  subtotal       Int
+  serviceFee     Int
+  discountAmount Int           @default(0)
+  guestCount     Int           @default(2)
+  checkInDate    DateTime?
+  checkOutDate   DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  items          BookingItem[]
+  payments       Payment[]
+
+  @@index([bookingRef])
+  @@index([userId])
+}
+
+model BookingItem {
+  id            String   @id @default(uuid())
+  bookingId     String
+  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  itemType      String
+  itemId        String
+  itemName      String
+  unitPrice     Int
+  quantity      Int      @default(1)
+  scheduledDate DateTime?
+  timeSlot      String?
+  status        String   @default("confirmed")
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  bookingId         String
+  booking           Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  razorpayOrderId   String        @unique
+  razorpayPaymentId String?
+  razorpaySignature String?
+  amount            Int
+  currency          String        @default("INR")
+  status            PaymentStatus @default(PENDING)
+  paymentMethod     String?
+  createdAt         DateTime      @default(now())
+
+  @@index([razorpayOrderId])
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType String
+  targetId   String
+  rating     Int
+  comment    String
+  createdAt  DateTime @default(now())
+
+  @@index([targetType, targetId])
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemType  String
+  itemId    String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, itemType, itemId])
+}
+
+model Guide {
+  id            String      @id @default(uuid())
+  slug          String      @unique
+  destinationId String
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  title         String
+  guideType     String      @default("KNOW_BEFORE_YOU_GO")
+  content       String
+  author        String      @default("TripJugaadu Editorial")
+  createdAt     DateTime    @default(now())
+
+  @@index([slug])
+}
+
+model AvailabilitySlot {
+  id            String    @id @default(uuid())
+  itemType      String    // ADVENTURE, STAY_ROOM, EXPERIENCE
+  itemId        String
+  date          DateTime
+  timeSlot      String?   // "06:00 AM", "09:00 AM" etc. or null
+  capacity      Int       @default(20)
+  bookedCount   Int       @default(0)
+  priceOverride Int?
+  isBlocked     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([itemType, itemId, date, timeSlot])
+  @@index([itemType, itemId, date])
+}
+
+model PriceRule {
+  id              String    @id @default(uuid())
+  itemType        String
+  itemId          String
+  name            String
+  startDate       DateTime
+  endDate         DateTime
+  multiplier      Float     @default(1.0)
+  fixedAdjustment Int       @default(0)
+  createdAt       DateTime  @default(now())
+
+  @@index([itemType, itemId])
+}
+
+model Coupon {
+  id            String        @id @default(uuid())
+  code          String        @unique
+  description   String?
+  discountType  String        @default("PERCENTAGE") // PERCENTAGE | FLAT
+  discountValue Int
+  minOrderValue Int           @default(0)
+  maxDiscount   Int?
+  usageLimit    Int?
+  timesUsed     Int           @default(0)
+  isActive      Boolean       @default(true)
+  expiresAt     DateTime?
+  createdAt     DateTime      @default(now())
+
+  usages        CouponUsage[]
+
+  @@index([code])
+}
+
+model CouponUsage {
+  id              String    @id @default(uuid())
+  couponId        String
+  coupon          Coupon    @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  userId          String
+  bookingRef      String?
+  discountApplied Int
+  usedAt          DateTime  @default(now())
+
+  @@index([userId])
+  @@index([couponId])
+}
+
+model AuditLog {
+  id           String    @id @default(uuid())
+  actorId      String
+  actorRole    String
+  action       String    // PROVIDER_APPROVED, LISTING_PUBLISHED, REFUND_ISSUED, etc.
+  resourceType String    // PROVIDER, LISTING, BOOKING, PAYMENT
+  resourceId   String
+  details      String?
+  ipAddress    String?
+  createdAt    DateTime  @default(now())
+
+  @@index([resourceType, resourceId])
+  @@index([action])
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String    @default("INFO") // INFO, BOOKING, READINESS, PAYMENT
+  link      String?
+  isRead    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  @@index([userId, isRead])
+}
