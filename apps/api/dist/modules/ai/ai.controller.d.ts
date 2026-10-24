@@ -43,13 +43,13 @@ export declare class AiController {
                     }[] | ({
                         destination: {
                             id: string;
+                            createdAt: Date;
                             slug: string;
                             name: string;
                             category: string;
                             heroImage: string;
                             description: string;
                             featured: boolean;
-                            createdAt: Date;
                             region: string;
                             state: string;
                             bestSeason: string | null;
@@ -60,6 +60,7 @@ export declare class AiController {
                         };
                     } & {
                         id: string;
+                        createdAt: Date;
                         slug: string;
                         destinationId: string;
                         name: string;
@@ -77,7 +78,6 @@ export declare class AiController {
                         rating: number;
                         reviewCount: number;
                         featured: boolean;
-                        createdAt: Date;
                     })[];
                     stays: {
                         id: string;
@@ -95,13 +95,13 @@ export declare class AiController {
                     }[] | ({
                         destination: {
                             id: string;
+                            createdAt: Date;
                             slug: string;
                             name: string;
                             category: string;
                             heroImage: string;
                             description: string;
                             featured: boolean;
-                            createdAt: Date;
                             region: string;
                             state: string;
                             bestSeason: string | null;
@@ -112,6 +112,7 @@ export declare class AiController {
                         };
                     } & {
                         id: string;
+                        createdAt: Date;
                         slug: string;
                         destinationId: string;
                         name: string;
@@ -119,28 +120,11 @@ export declare class AiController {
                         heroImage: string;
                         description: string;
                         rating: number;
-                        createdAt: Date;
                         stayType: string;
                         address: string | null;
                         amenities: string[];
                     })[];
                     destinations: {
-                        id: string;
-                        slug: string;
-                        name: string;
-                        category: string;
-                        heroImage: string;
-                        description: string;
-                        featured: boolean;
-                        createdAt: Date;
-                        region: string;
-                        state: string;
-                        bestSeason: string | null;
-                        daysRecommend: string;
-                        latitude: number | null;
-                        longitude: number | null;
-                        updatedAt: Date;
-                    }[] | {
                         id: string;
                         slug: string;
                         name: string;
@@ -154,6 +138,22 @@ export declare class AiController {
                         latitude: number;
                         longitude: number;
                         featured: boolean;
+                    }[] | {
+                        id: string;
+                        createdAt: Date;
+                        slug: string;
+                        name: string;
+                        category: string;
+                        heroImage: string;
+                        description: string;
+                        featured: boolean;
+                        region: string;
+                        state: string;
+                        bestSeason: string | null;
+                        daysRecommend: string;
+                        latitude: number | null;
+                        longitude: number | null;
+                        updatedAt: Date;
                     }[];
                 };
                 authoritativeSource: string;
@@ -207,13 +207,13 @@ export declare class AiController {
             }[] | ({
                 destination: {
                     id: string;
+                    createdAt: Date;
                     slug: string;
                     name: string;
                     category: string;
                     heroImage: string;
                     description: string;
                     featured: boolean;
-                    createdAt: Date;
                     region: string;
                     state: string;
                     bestSeason: string | null;
@@ -224,6 +224,7 @@ export declare class AiController {
                 };
             } & {
                 id: string;
+                createdAt: Date;
                 slug: string;
                 destinationId: string;
                 name: string;
@@ -241,7 +242,6 @@ export declare class AiController {
                 rating: number;
                 reviewCount: number;
                 featured: boolean;
-                createdAt: Date;
             })[];
             stays: {
                 id: string;
@@ -259,13 +259,13 @@ export declare class AiController {
             }[] | ({
                 destination: {
                     id: string;
+                    createdAt: Date;
                     slug: string;
                     name: string;
                     category: string;
                     heroImage: string;
                     description: string;
                     featured: boolean;
-                    createdAt: Date;
                     region: string;
                     state: string;
                     bestSeason: string | null;
@@ -276,6 +276,7 @@ export declare class AiController {
                 };
             } & {
                 id: string;
+                createdAt: Date;
                 slug: string;
                 destinationId: string;
                 name: string;
@@ -283,28 +284,11 @@ export declare class AiController {
                 heroImage: string;
                 description: string;
                 rating: number;
-                createdAt: Date;
                 stayType: string;
                 address: string | null;
                 amenities: string[];
             })[];
             destinations: {
-                id: string;
-                slug: string;
-                name: string;
-                category: string;
-                heroImage: string;
-                description: string;
-                featured: boolean;
-                createdAt: Date;
-                region: string;
-                state: string;
-                bestSeason: string | null;
-                daysRecommend: string;
-                latitude: number | null;
-                longitude: number | null;
-                updatedAt: Date;
-            }[] | {
                 id: string;
                 slug: string;
                 name: string;
@@ -318,6 +302,22 @@ export declare class AiController {
                 latitude: number;
                 longitude: number;
                 featured: boolean;
+            }[] | {
+                id: string;
+                createdAt: Date;
+                slug: string;
+                name: string;
+                category: string;
+                heroImage: string;
+                description: string;
+                featured: boolean;
+                region: string;
+                state: string;
+                bestSeason: string | null;
+                daysRecommend: string;
+                latitude: number | null;
+                longitude: number | null;
+                updatedAt: Date;
             }[];
         };
         authoritativeSource: string;
@@ -363,13 +363,13 @@ export declare class AiController {
             }[] | ({
                 destination: {
                     id: string;
+                    createdAt: Date;
                     slug: string;
                     name: string;
                     category: string;
                     heroImage: string;
                     description: string;
                     featured: boolean;
-                    createdAt: Date;
                     region: string;
                     state: string;
                     bestSeason: string | null;
@@ -380,6 +380,7 @@ export declare class AiController {
                 };
             } & {
                 id: string;
+                createdAt: Date;
                 slug: string;
                 destinationId: string;
                 name: string;
@@ -397,7 +398,6 @@ export declare class AiController {
                 rating: number;
                 reviewCount: number;
                 featured: boolean;
-                createdAt: Date;
             })[];
         } | {
             title: string;
@@ -418,13 +418,13 @@ export declare class AiController {
             }[] | ({
                 destination: {
                     id: string;
+                    createdAt: Date;
                     slug: string;
                     name: string;
                     category: string;
                     heroImage: string;
                     description: string;
                     featured: boolean;
-                    createdAt: Date;
                     region: string;
                     state: string;
                     bestSeason: string | null;
@@ -435,6 +435,7 @@ export declare class AiController {
                 };
             } & {
                 id: string;
+                createdAt: Date;
                 slug: string;
                 destinationId: string;
                 name: string;
@@ -442,7 +443,6 @@ export declare class AiController {
                 heroImage: string;
                 description: string;
                 rating: number;
-                createdAt: Date;
                 stayType: string;
                 address: string | null;
                 amenities: string[];
@@ -559,13 +559,13 @@ export declare class AiController {
                         }[] | ({
                             destination: {
                                 id: string;
+                                createdAt: Date;
                                 slug: string;
                                 name: string;
                                 category: string;
                                 heroImage: string;
                                 description: string;
                                 featured: boolean;
-                                createdAt: Date;
                                 region: string;
                                 state: string;
                                 bestSeason: string | null;
@@ -576,6 +576,7 @@ export declare class AiController {
                             };
                         } & {
                             id: string;
+                            createdAt: Date;
                             slug: string;
                             destinationId: string;
                             name: string;
@@ -593,7 +594,6 @@ export declare class AiController {
                             rating: number;
                             reviewCount: number;
                             featured: boolean;
-                            createdAt: Date;
                         })[];
                         stays: {
                             id: string;
@@ -611,13 +611,13 @@ export declare class AiController {
                         }[] | ({
                             destination: {
                                 id: string;
+                                createdAt: Date;
                                 slug: string;
                                 name: string;
                                 category: string;
                                 heroImage: string;
                                 description: string;
                                 featured: boolean;
-                                createdAt: Date;
                                 region: string;
                                 state: string;
                                 bestSeason: string | null;
@@ -628,6 +628,7 @@ export declare class AiController {
                             };
                         } & {
                             id: string;
+                            createdAt: Date;
                             slug: string;
                             destinationId: string;
                             name: string;
@@ -635,28 +636,11 @@ export declare class AiController {
                             heroImage: string;
                             description: string;
                             rating: number;
-                            createdAt: Date;
                             stayType: string;
                             address: string | null;
                             amenities: string[];
                         })[];
                         destinations: {
-                            id: string;
-                            slug: string;
-                            name: string;
-                            category: string;
-                            heroImage: string;
-                            description: string;
-                            featured: boolean;
-                            createdAt: Date;
-                            region: string;
-                            state: string;
-                            bestSeason: string | null;
-                            daysRecommend: string;
-                            latitude: number | null;
-                            longitude: number | null;
-                            updatedAt: Date;
-                        }[] | {
                             id: string;
                             slug: string;
                             name: string;
@@ -670,6 +654,22 @@ export declare class AiController {
                             latitude: number;
                             longitude: number;
                             featured: boolean;
+                        }[] | {
+                            id: string;
+                            createdAt: Date;
+                            slug: string;
+                            name: string;
+                            category: string;
+                            heroImage: string;
+                            description: string;
+                            featured: boolean;
+                            region: string;
+                            state: string;
+                            bestSeason: string | null;
+                            daysRecommend: string;
+                            latitude: number | null;
+                            longitude: number | null;
+                            updatedAt: Date;
                         }[];
                     };
                     authoritativeSource: string;
@@ -748,13 +748,13 @@ export declare class AiController {
                     }[] | ({
                         destination: {
                             id: string;
+                            createdAt: Date;
                             slug: string;
                             name: string;
                             category: string;
                             heroImage: string;
                             description: string;
                             featured: boolean;
-                            createdAt: Date;
                             region: string;
                             state: string;
                             bestSeason: string | null;
@@ -765,6 +765,7 @@ export declare class AiController {
                         };
                     } & {
                         id: string;
+                        createdAt: Date;
                         slug: string;
                         destinationId: string;
                         name: string;
@@ -782,7 +783,6 @@ export declare class AiController {
                         rating: number;
                         reviewCount: number;
                         featured: boolean;
-                        createdAt: Date;
                     })[];
                 } | {
                     title: string;
@@ -803,13 +803,13 @@ export declare class AiController {
                     }[] | ({
                         destination: {
                             id: string;
+                            createdAt: Date;
                             slug: string;
                             name: string;
                             category: string;
                             heroImage: string;
                             description: string;
                             featured: boolean;
-                            createdAt: Date;
                             region: string;
                             state: string;
                             bestSeason: string | null;
@@ -820,6 +820,7 @@ export declare class AiController {
                         };
                     } & {
                         id: string;
+                        createdAt: Date;
                         slug: string;
                         destinationId: string;
                         name: string;
@@ -827,7 +828,6 @@ export declare class AiController {
                         heroImage: string;
                         description: string;
                         rating: number;
-                        createdAt: Date;
                         stayType: string;
                         address: string | null;
                         amenities: string[];

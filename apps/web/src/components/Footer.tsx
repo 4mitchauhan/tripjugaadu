@@ -35,10 +35,10 @@ export default function Footer() {
           <div>
             <div className="footer__col-title">Platform & B2B</div>
             <Link href="/admin" className="footer__link" style={{ color: '#ffc107' }}>Admin Console</Link>
-            <a href="http://localhost:4000/api/v1/finance/summary" target="_blank" rel="noreferrer" className="footer__link">Financial Ledger API</a>
-            <a href="http://localhost:4000/api/v1/partner/catalog" target="_blank" rel="noreferrer" className="footer__link">Partner B2B API</a>
-            <a href="http://localhost:4000/api/v1/health" target="_blank" rel="noreferrer" className="footer__link">Observability & Health</a>
-            <a href="http://localhost:4000/api/v1/metrics" target="_blank" rel="noreferrer" className="footer__link">Platform Metrics</a>
+            <Link href="/admin#ledger" className="footer__link">Financial Ledger</Link>
+            <Link href="/admin#partners" className="footer__link">Partner B2B Gateway</Link>
+            <Link href="/admin#health" className="footer__link">Observability & Health</Link>
+            <Link href="/admin#metrics" className="footer__link">Platform Metrics</Link>
           </div>
           
           <div>
@@ -46,7 +46,7 @@ export default function Footer() {
             <Link href="/provider/dashboard" className="footer__link">Operator Portal</Link>
             <Link href="/provider/register" className="footer__link">Join as Operator</Link>
             <Link href="/provider/listings" className="footer__link">Manage Inventory</Link>
-            <a href="http://localhost:4000/api/v1/finance/commissions" target="_blank" rel="noreferrer" className="footer__link">Commission Tiers</a>
+            <Link href="/provider/dashboard#commissions" className="footer__link">Commission Tiers</Link>
           </div>
           
           <div>
@@ -62,9 +62,9 @@ export default function Footer() {
         <div className="footer__bottom">
           <p className="footer__copyright">© 2026 TripJugaadu Inc. All rights reserved. Zero-Trust Architecture.</p>
           <div style={{ display: 'flex', gap: 'var(--space-4)' }}>
-            <a href="#" className="footer__link" style={{ padding: 0 }}>Instagram</a>
-            <a href="#" className="footer__link" style={{ padding: 0 }}>Twitter</a>
-            <a href="#" className="footer__link" style={{ padding: 0 }}>YouTube</a>
+            <span className="footer__link" style={{ padding: 0, opacity: 0.6, cursor: 'default' }} title="Official channel coming soon">Instagram</span>
+            <span className="footer__link" style={{ padding: 0, opacity: 0.6, cursor: 'default' }} title="Official channel coming soon">Twitter</span>
+            <span className="footer__link" style={{ padding: 0, opacity: 0.6, cursor: 'default' }} title="Official channel coming soon">YouTube</span>
           </div>
         </div>
       </div>

@@ -101,6 +101,10 @@ export default function Navigation() {
             </svg>
           </Link>
 
+          <Link href="/login" className="btn btn--ghost btn--sm nav__login-desktop">
+            {t('nav.login')}
+          </Link>
+
           <Link href="/dashboard" className="btn btn--secondary btn--sm">
             {t('nav.dashboard')}
           </Link>

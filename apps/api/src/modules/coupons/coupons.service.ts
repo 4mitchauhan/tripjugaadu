@@ -1,8 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
 import { PrismaService } from '../../common/prisma.service.js';
 
 export class ValidateCouponDto {
+  @IsNotEmpty()
+  @IsString()
   code!: string;
+
+  @IsNumber()
   cartTotal!: number;
 }
 
@@ -36,18 +41,29 @@ export class CouponsService {
       minOrderValue: 5000,
       validUntil: '2026-12-31',
       isActive: true
+    },
+    {
+      code: 'EXPIRED2025',
+      description: 'Expired test coupon',
+      discountType: 'FIXED',
+      discountValue: 500,
+      minOrderValue: 1000,
+      validUntil: '2025-01-01',
+      isActive: true
     }
   ];
 
   constructor(private readonly prisma: PrismaService) {}
 
   async getActiveCoupons() {
-    return this.activeCoupons.map(c => ({
-      code: c.code,
-      description: c.description,
-      minOrderValue: c.minOrderValue,
-      validUntil: c.validUntil
-    }));
+    return this.activeCoupons
+      .filter(c => c.isActive && new Date(c.validUntil) >= new Date())
+      .map(c => ({
+        code: c.code,
+        description: c.description,
+        minOrderValue: c.minOrderValue,
+        validUntil: c.validUntil
+      }));
   }
 
   async validateCoupon(dto: ValidateCouponDto) {
@@ -60,7 +76,12 @@ export class CouponsService {
     );
 
     if (!coupon) {
-      throw new BadRequestException(`Invalid or expired coupon code '${dto.code}'`);
+      throw new BadRequestException(`Invalid or inactive coupon code '${dto.code}'`);
+    }
+
+    // Check expiration date
+    if (coupon.validUntil && new Date(coupon.validUntil) < new Date()) {
+      throw new BadRequestException(`Coupon '${coupon.code}' expired on ${coupon.validUntil}`);
     }
 
     if (dto.cartTotal < coupon.minOrderValue) {

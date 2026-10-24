@@ -12,6 +12,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 import { Controller, Get, Post, Headers, Body } from '@nestjs/common';
 import { PartnerService } from './partner.service.js';
+import { PartnerBookingRequest } from './partner.interface.js';
 let PartnerController = class PartnerController {
     partnerService;
     constructor(partnerService) {
@@ -52,7 +53,7 @@ __decorate([
     __param(0, Headers('x-partner-key')),
     __param(1, Body()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, PartnerBookingRequest]),
     __metadata("design:returntype", void 0)
 ], PartnerController.prototype, "createBooking", null);
 __decorate([

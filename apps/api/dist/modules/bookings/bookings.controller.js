@@ -10,8 +10,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Headers, UnauthorizedException } from '@nestjs/common';
 import { BookingsService } from './bookings.service.js';
+import { verifyJwt } from '../../common/jwt.util.js';
 let BookingsController = class BookingsController {
     bookingsService;
     constructor(bookingsService) {
@@ -21,16 +22,27 @@ let BookingsController = class BookingsController {
         const booking = await this.bookingsService.createBooking(body);
         return {
             status: 'success',
-            message: 'Booking created and confirmed',
+            message: 'Booking created, awaiting payment',
             data: booking,
         };
     }
-    async getMyBookings() {
-        const bookings = await this.bookingsService.getAllBookings();
+    async getMyBookings(authHeader) {
+        if (!authHeader) {
+            throw new UnauthorizedException('Authentication token is required to view personal bookings list');
+        }
+        const verifyResult = verifyJwt(authHeader);
+        if (!verifyResult.valid || !verifyResult.payload) {
+            throw new UnauthorizedException('Invalid or expired authentication token');
+        }
+        const user = verifyResult.payload;
+        const allBookings = await this.bookingsService.getAllBookings();
+        const userBookings = user.role === 'ADMIN'
+            ? allBookings
+            : allBookings.filter((b) => b.travelerEmail.toLowerCase() === user.email.toLowerCase());
         return {
             status: 'success',
-            count: bookings.length,
-            data: bookings,
+            count: userBookings.length,
+            data: userBookings,
         };
     }
     async getBooking(ref) {
@@ -50,8 +62,9 @@ __decorate([
 ], BookingsController.prototype, "createBooking", null);
 __decorate([
     Get(),
+    __param(0, Headers('authorization')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BookingsController.prototype, "getMyBookings", null);
 __decorate([

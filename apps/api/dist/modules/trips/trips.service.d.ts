@@ -1,12 +1,15 @@
 import { PrismaService } from '../../common/prisma.service.js';
 interface CreateTripDto {
-    destinationId: string;
-    startDate: string;
-    endDate: string;
+    destinationId?: string;
+    startDate?: string;
+    endDate?: string;
     travelersCount?: number;
     interests?: string[];
     budgetTier?: string;
     title?: string;
+    days?: any[];
+    unscheduledItems?: any[];
+    budgetLimit?: number | null;
 }
 export declare class TripsService {
     private readonly prisma;
@@ -21,18 +24,13 @@ export declare class TripsService {
         endDate: string;
         travelersCount: number;
         budgetTier: string;
+        budgetLimit: number | null;
+        unscheduledItems: any[];
         readinessScore: number;
         days: {
-            day: number;
-            label: string;
-            items: {
-                id: string;
-                name: string;
-                time: string;
-                duration: string;
-                status: string;
-                price: string;
-            }[];
+            day: any;
+            label: any;
+            items: any;
         }[];
     }>;
     findUserTrips(): Promise<any[]>;

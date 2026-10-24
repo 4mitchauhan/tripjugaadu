@@ -10,8 +10,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service.js';
+import { AuthGuard } from '../../common/guards/auth.guard.js';
+import { RolesGuard } from '../../common/guards/roles.guard.js';
+import { Roles } from '../../common/guards/roles.decorator.js';
 let AdminController = class AdminController {
     adminService;
     constructor(adminService) {
@@ -117,6 +120,8 @@ __decorate([
 ], AdminController.prototype, "getAuditLogs", null);
 AdminController = __decorate([
     Controller('admin'),
+    UseGuards(AuthGuard, RolesGuard),
+    Roles('ADMIN'),
     __metadata("design:paramtypes", [AdminService])
 ], AdminController);
 export { AdminController };

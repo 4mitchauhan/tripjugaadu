@@ -1,5 +1,8 @@
-import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, UseGuards } from '@nestjs/common';
 import { ProvidersService, ProviderRegistrationDto, CreateListingDto } from './providers.service.js';
+import { AuthGuard } from '../../common/guards/auth.guard.js';
+import { RolesGuard } from '../../common/guards/roles.guard.js';
+import { Roles } from '../../common/guards/roles.decorator.js';
 
 @Controller('providers')
 export class ProvidersController {
@@ -16,6 +19,8 @@ export class ProvidersController {
   }
 
   @Get('dashboard')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('PROVIDER', 'ADMIN')
   async getDashboardSummary() {
     const data = await this.providersService.getDashboardSummary();
     return {
@@ -25,6 +30,8 @@ export class ProvidersController {
   }
 
   @Get('listings')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('PROVIDER', 'ADMIN')
   async getListings() {
     const listings = await this.providersService.getListings();
     return {
@@ -35,6 +42,8 @@ export class ProvidersController {
   }
 
   @Post('listings')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('PROVIDER', 'ADMIN')
   async createListing(@Body() body: CreateListingDto) {
     const listing = await this.providersService.createListing(body);
     return {
@@ -45,6 +54,8 @@ export class ProvidersController {
   }
 
   @Get('bookings')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('PROVIDER', 'ADMIN')
   async getBookings() {
     const bookings = await this.providersService.getBookings();
     return {
@@ -55,6 +66,8 @@ export class ProvidersController {
   }
 
   @Patch('bookings/:id/checkin')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('PROVIDER', 'ADMIN')
   async updateCheckIn(
     @Param('id') id: string,
     @Body('checkedIn') checkedIn: boolean,

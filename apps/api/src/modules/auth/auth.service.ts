@@ -1,98 +1,184 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service.js';
+import { hashPassword, verifyPassword } from '../../common/crypto.util.js';
+import { signJwt, verifyJwt } from '../../common/jwt.util.js';
+
+export interface UserRecord {
+  id: string;
+  email: string;
+  passwordHash: string;
+  firstName: string;
+  lastName: string;
+  role: 'USER' | 'PROVIDER' | 'ADMIN';
+  avatarUrl: string | null;
+  isVerified: boolean;
+  createdAt: string;
+}
 
 @Injectable()
 export class AuthService {
-  private inMemoryUsers: any[] = [
+  private readonly logger = new Logger(AuthService.name);
+
+  // Pre-hashed credentials for default roles (Amit: USER, Operator: PROVIDER, Admin: ADMIN)
+  private inMemoryUsers: UserRecord[] = [
     {
       id: 'usr-amit-01',
       email: 'amit@tripjugaadu.com',
-      password: 'password123',
+      passwordHash: hashPassword('password123'),
       firstName: 'Amit',
       lastName: 'Sharma',
       role: 'USER',
       avatarUrl: null,
-      isVerified: true
-    }
+      isVerified: true,
+      createdAt: '2026-10-01T00:00:00.000Z',
+    },
+    {
+      id: 'usr-provider-01',
+      email: 'operator@himalayaexpeditions.com',
+      passwordHash: hashPassword('providerpass123'),
+      firstName: 'Vikram',
+      lastName: 'Negi',
+      role: 'PROVIDER',
+      avatarUrl: null,
+      isVerified: true,
+      createdAt: '2026-10-01T00:00:00.000Z',
+    },
+    {
+      id: 'usr-admin-01',
+      email: 'admin@tripjugaadu.com',
+      passwordHash: hashPassword('adminpass123'),
+      firstName: 'Security',
+      lastName: 'Officer',
+      role: 'ADMIN',
+      avatarUrl: null,
+      isVerified: true,
+      createdAt: '2026-10-01T00:00:00.000Z',
+    },
   ];
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async register(body: { email: string; password?: string; fullName?: string; firstName?: string; lastName?: string }) {
-    if (!body.email) {
-      throw new BadRequestException('Email is required');
+  async register(body: {
+    email: string;
+    password?: string;
+    fullName?: string;
+    firstName?: string;
+    lastName?: string;
+    role?: 'USER' | 'PROVIDER';
+  }) {
+    if (!body.email || typeof body.email !== 'string') {
+      throw new BadRequestException('Valid email address is required');
     }
 
-    const existing = this.inMemoryUsers.find(u => u.email.toLowerCase() === body.email.toLowerCase());
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const cleanEmail = body.email.trim().toLowerCase();
+    if (!emailRegex.test(cleanEmail)) {
+      throw new BadRequestException('Invalid email address format');
+    }
+
+    const password = body.password || '';
+    if (password.length < 6) {
+      throw new BadRequestException('Password must be at least 6 characters long');
+    }
+
+    const existing = this.inMemoryUsers.find((u) => u.email.toLowerCase() === cleanEmail);
     if (existing) {
-      throw new BadRequestException('User with this email already exists');
+      throw new BadRequestException('An account with this email address already exists');
     }
 
-    let fName = body.firstName || 'Traveler';
-    let lName = body.lastName || '';
+    let fName = body.firstName?.trim() || 'Traveler';
+    let lName = body.lastName?.trim() || '';
     if (body.fullName) {
       const parts = body.fullName.trim().split(' ');
       fName = parts[0] || 'Traveler';
       lName = parts.slice(1).join(' ') || '';
     }
 
-    const newUser = {
-      id: `usr-${Date.now()}`,
-      email: body.email.toLowerCase(),
-      password: body.password || 'securepass',
+    // Role cannot be arbitrarily escalated to ADMIN during registration
+    const requestedRole: 'USER' | 'PROVIDER' = body.role === 'PROVIDER' ? 'PROVIDER' : 'USER';
+
+    const newUser: UserRecord = {
+      id: `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      email: cleanEmail,
+      passwordHash: hashPassword(password),
       firstName: fName,
       lastName: lName,
-      role: 'USER',
+      role: requestedRole,
       avatarUrl: null,
-      isVerified: true
+      isVerified: true,
+      createdAt: new Date().toISOString(),
     };
 
     this.inMemoryUsers.push(newUser);
+    this.logger.log(`New user registered: ${newUser.email} [${newUser.role}]`);
 
-    const token = `tj_jwt_${Buffer.from(JSON.stringify({ id: newUser.id, email: newUser.email, role: newUser.role })).toString('base64')}`;
+    const token = signJwt({
+      sub: newUser.id,
+      email: newUser.email,
+      role: newUser.role,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+    });
 
     return {
       token,
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        role: newUser.role,
-        isVerified: newUser.isVerified
-      }
+      user: this.sanitizeUser(newUser),
     };
   }
 
   async login(body: { email: string; password?: string }) {
-    if (!body.email) {
+    if (!body.email || typeof body.email !== 'string') {
       throw new BadRequestException('Email is required');
     }
 
-    const user = this.inMemoryUsers.find(u => u.email.toLowerCase() === body.email.toLowerCase());
-    if (!user) {
-      // Demo auto-registration for streamlined login or check
-      return this.register({ email: body.email, fullName: body.email.split('@')[0] });
+    const cleanEmail = body.email.trim().toLowerCase();
+    const candidatePassword = body.password || '';
+
+    const user = this.inMemoryUsers.find((u) => u.email.toLowerCase() === cleanEmail);
+
+    // Constant-time check / generic error to prevent user enumeration
+    if (!user || !verifyPassword(candidatePassword, user.passwordHash)) {
+      throw new UnauthorizedException('Invalid email or password');
     }
 
-    const token = `tj_jwt_${Buffer.from(JSON.stringify({ id: user.id, email: user.email, role: user.role })).toString('base64')}`;
+    const token = signJwt({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
+
+    this.logger.log(`User logged in: ${user.email} [${user.role}]`);
 
     return {
       token,
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        isVerified: user.isVerified
-      }
+      user: this.sanitizeUser(user),
     };
   }
 
-  async getMe(token?: string) {
+  async getMe(authHeader?: string) {
+    if (!authHeader) {
+      throw new UnauthorizedException('Authentication token is required');
+    }
+
+    const verifyResult = verifyJwt(authHeader);
+    if (!verifyResult.valid || !verifyResult.payload) {
+      throw new UnauthorizedException(verifyResult.error || 'Invalid or expired token');
+    }
+
+    const user = this.inMemoryUsers.find((u) => u.id === verifyResult.payload?.sub);
+    if (!user) {
+      throw new UnauthorizedException('User account associated with this token no longer exists');
+    }
+
     return {
-      user: this.inMemoryUsers[0]
+      user: this.sanitizeUser(user),
     };
+  }
+
+  private sanitizeUser(user: UserRecord) {
+    const { passwordHash: _, ...safeUser } = user;
+    return safeUser;
   }
 }

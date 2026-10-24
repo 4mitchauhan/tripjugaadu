@@ -30,11 +30,11 @@ export declare class ProvidersService {
     register(dto: ProviderRegistrationDto): Promise<{
         id: string;
         businessName: string;
-        businessRegNo: string;
-        ownerName: string;
+        businessRegNo: any;
+        ownerName: any;
         email: string;
         phone: string;
-        activityRegion: string;
+        activityRegion: any;
         verified: boolean;
         status: string;
         rating: number;
@@ -57,7 +57,7 @@ export declare class ProvidersService {
         id: string;
         providerId: any;
         title: string;
-        category: "Water" | "Extreme" | "Land" | "Air";
+        category: "Water" | "Land" | "Air" | "Extreme";
         difficulty: "Extreme" | "Easy" | "Moderate" | "Hard";
         destinationSlug: string;
         duration: string;

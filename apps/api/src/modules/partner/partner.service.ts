@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { PartnerAccount, PartnerWebhookEvent, PartnerBookingRequest } from './partner.interface.js';
 import { SEED_DESTINATIONS, SEED_ADVENTURES, SEED_STAYS } from '../../common/seed-data.js';
 
@@ -41,11 +41,17 @@ export class PartnerService {
   ];
 
   validateKey(apiKey?: string): PartnerAccount {
-    if (!apiKey) {
-      // In development, default to sample enterprise partner if header is missing
-      return this.partners[0];
+    if (!apiKey || typeof apiKey !== 'string' || apiKey.trim().length === 0) {
+      throw new UnauthorizedException('Valid X-Partner-Key header is required to access Partner APIs');
     }
-    const found = this.partners.find(p => p.apiKey === apiKey && p.active);
+    const cleanKey = apiKey.trim();
+    const keyBuf = Buffer.from(cleanKey);
+
+    const found = this.partners.find(p => {
+      const pBuf = Buffer.from(p.apiKey);
+      return p.active && keyBuf.length === pBuf.length && timingSafeEqual(keyBuf, pBuf);
+    });
+
     if (!found) {
       throw new UnauthorizedException('Invalid or inactive Partner API Key (X-Partner-Key)');
     }
@@ -102,7 +108,7 @@ export class PartnerService {
       issuedAt: now,
     };
 
-    const webhookSecret = 'tj_secret_partner_webhook_production';
+    const webhookSecret = process.env.PARTNER_WEBHOOK_SECRET || process.env.PARTNER_SECRET_KEY || 'tj_secret_partner_webhook_production';
     const signature = createHmac('sha256', webhookSecret)
       .update(JSON.stringify(payload))
       .digest('hex');

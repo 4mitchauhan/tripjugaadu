@@ -9,12 +9,16 @@ export class GeminiAiProvider implements AiModelProvider {
   name = 'Google Gemini Intelligence';
   private readonly logger = new Logger(GeminiAiProvider.name);
 
-  private readonly apiKey = process.env.GEMINI_API_KEY || 'AQ.Ab8RN6JOY8b3YJXaH7vzqHH64YXSJaLw0PIUJhGbOU9868Y-5g';
+  private readonly apiKey = process.env.GEMINI_API_KEY || '';
   private readonly primaryModel = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
 
   constructor(private readonly fallbackMock: MockAiProvider) {}
 
   private async callGemini(prompt: string, systemInstruction?: string): Promise<string> {
+    if (!this.apiKey) {
+      throw new Error('GEMINI_API_KEY not configured. Falling back to native deterministic model.');
+    }
+
     const modelsToTry = ['gemini-1.5-flash', 'gemini-2.0-flash', this.primaryModel];
 
     for (const model of modelsToTry) {

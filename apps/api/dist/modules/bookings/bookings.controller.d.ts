@@ -5,30 +5,15 @@ export declare class BookingsController {
     createBooking(body: any): Promise<{
         status: string;
         message: string;
-        data: {
-            id: string;
-            bookingRef: string;
-            destination: any;
-            dates: any;
-            guestCount: any;
-            travelerName: any;
-            travelerEmail: any;
-            status: string;
-            subtotal: any;
-            serviceFee: any;
-            discount: any;
-            totalAmount: number;
-            items: any;
-            createdAt: string;
-        };
+        data: import("./bookings.service.js").BookingRecord;
     }>;
-    getMyBookings(): Promise<{
+    getMyBookings(authHeader?: string): Promise<{
         status: string;
         count: number;
-        data: any[];
+        data: import("./bookings.service.js").BookingRecord[];
     }>;
     getBooking(ref: string): Promise<{
         status: string;
-        data: any;
+        data: import("./bookings.service.js").BookingRecord;
     }>;
 }

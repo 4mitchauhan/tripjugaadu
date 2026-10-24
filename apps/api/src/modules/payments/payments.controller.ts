@@ -22,8 +22,9 @@ export class PaymentsController {
     @Body('orderId') orderId: string,
     @Body('paymentId') paymentId: string,
     @Body('signature') signature: string,
+    @Body('bookingRef') bookingRef?: string,
   ) {
-    const result = await this.paymentsService.verifyPayment(orderId, paymentId, signature);
+    const result = await this.paymentsService.verifyPayment(orderId, paymentId, signature, bookingRef);
     return {
       status: 'success',
       data: result,

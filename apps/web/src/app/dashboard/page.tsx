@@ -2,6 +2,23 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { 
+  Plane, 
+  CalendarCheck, 
+  Calendar, 
+  Backpack, 
+  Heart, 
+  Building2, 
+  LayoutDashboard, 
+  Compass, 
+  Settings, 
+  ArrowLeft, 
+  ArrowRight, 
+  MapPin, 
+  Check,
+  Star,
+  X
+} from 'lucide-react';
 
 interface PackingItem {
   id: string;
@@ -13,6 +30,14 @@ interface PackingItem {
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'trips' | 'packing' | 'wishlist'>('dashboard');
+
+  // Review Operator Modal State
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   // Initial Packing Items for Rishikesh Expedition
   const [packingList, setPackingList] = useState<PackingItem[]>([
@@ -59,12 +84,12 @@ export default function DashboardPage() {
   const readinessPercent = Math.round((completedCount / packingList.length) * 100);
 
   const dashCards = [
-    { icon: '✈', label: 'My Trips', title: 'Upcoming Trips', subtitle: '1 active, 2 completed', action: () => setActiveTab('trips') },
-    { icon: '📋', label: 'Bookings', title: 'Active Vouchers', subtitle: '3 confirmed activities', link: '/confirmation' },
-    { icon: '📅', label: 'Itinerary', title: 'Interactive Itinerary', subtitle: '3-day timeline schedule', link: '/itinerary' },
-    { icon: '🎒', label: 'Readiness', title: 'Packing Checklist', subtitle: `${readinessPercent}% ready (${completedCount}/${packingList.length} items)`, action: () => setActiveTab('packing') },
-    { icon: '♡', label: 'Wishlist', title: 'Saved Stays & Treks', subtitle: '4 items bookmarked', action: () => setActiveTab('wishlist') },
-    { icon: '📌', label: 'Operator Portal', title: 'Marketplace Partner', subtitle: 'Switch to Operator View', link: '/provider/dashboard' }
+    { icon: Plane, label: 'My Trips', title: 'Upcoming Trips', subtitle: '1 active, 2 completed', action: () => setActiveTab('trips') },
+    { icon: CalendarCheck, label: 'Bookings', title: 'Active Vouchers', subtitle: '3 confirmed activities', link: '/confirmation?ref=TJ-784219' },
+    { icon: Calendar, label: 'Itinerary', title: 'Interactive Itinerary', subtitle: '3-day timeline schedule', link: '/itinerary' },
+    { icon: Backpack, label: 'Readiness', title: 'Packing Checklist', subtitle: `${readinessPercent}% ready (${completedCount}/${packingList.length} items)`, action: () => setActiveTab('packing') },
+    { icon: Heart, label: 'Wishlist', title: 'Saved Stays & Treks', subtitle: '4 items bookmarked', action: () => setActiveTab('wishlist') },
+    { icon: Building2, label: 'Operator Portal', title: 'Marketplace Partner', subtitle: 'Switch to Operator View', link: '/provider/dashboard' }
   ];
 
   return (
@@ -82,50 +107,59 @@ export default function DashboardPage() {
 
           <div
             onClick={() => setActiveTab('dashboard')}
-            className={`dashboard__nav-item cursor-pointer ${activeTab === 'dashboard' ? 'dashboard__nav-item--active' : ''}`}
+            className={`dashboard__nav-item cursor-pointer flex items-center gap-2.5 ${activeTab === 'dashboard' ? 'dashboard__nav-item--active' : ''}`}
           >
-            <span>◆</span> Overview Dashboard
+            <LayoutDashboard size={18} strokeWidth={1.8} className="text-[var(--color-accent)] shrink-0" />
+            <span>Overview Dashboard</span>
           </div>
 
           <div
             onClick={() => setActiveTab('trips')}
-            className={`dashboard__nav-item cursor-pointer ${activeTab === 'trips' ? 'dashboard__nav-item--active' : ''}`}
+            className={`dashboard__nav-item cursor-pointer flex items-center gap-2.5 ${activeTab === 'trips' ? 'dashboard__nav-item--active' : ''}`}
           >
-            <span>✈</span> My Trips & Timeline
+            <Plane size={18} strokeWidth={1.8} className="text-[var(--color-accent)] shrink-0" />
+            <span>My Trips & Timeline</span>
           </div>
 
           <div
             onClick={() => setActiveTab('packing')}
-            className={`dashboard__nav-item cursor-pointer ${activeTab === 'packing' ? 'dashboard__nav-item--active' : ''}`}
+            className={`dashboard__nav-item cursor-pointer flex items-center gap-2.5 ${activeTab === 'packing' ? 'dashboard__nav-item--active' : ''}`}
           >
-            <span>🎒</span> Travel Readiness & Packing
+            <Backpack size={18} strokeWidth={1.8} className="text-[var(--color-accent)] shrink-0" />
+            <span>Travel Readiness & Packing</span>
           </div>
 
           <div
             onClick={() => setActiveTab('wishlist')}
-            className={`dashboard__nav-item cursor-pointer ${activeTab === 'wishlist' ? 'dashboard__nav-item--active' : ''}`}
+            className={`dashboard__nav-item cursor-pointer flex items-center gap-2.5 ${activeTab === 'wishlist' ? 'dashboard__nav-item--active' : ''}`}
           >
-            <span>♡</span> Saved Wishlist
+            <Heart size={18} strokeWidth={1.8} className="text-[var(--color-accent)] shrink-0" />
+            <span>Saved Wishlist</span>
           </div>
 
-          <Link href="/confirmation" className="dashboard__nav-item">
-            <span>📋</span> Active Vouchers
+          <Link href="/confirmation" className="dashboard__nav-item flex items-center gap-2.5">
+            <CalendarCheck size={18} strokeWidth={1.8} className="text-[var(--color-accent)] shrink-0" />
+            <span>Active Vouchers</span>
           </Link>
 
-          <Link href="/trip-builder" className="dashboard__nav-item">
-            <span>🛠</span> Trip Builder
+          <Link href="/trip-builder" className="dashboard__nav-item flex items-center gap-2.5">
+            <Compass size={18} strokeWidth={1.8} className="text-[var(--color-accent)] shrink-0" />
+            <span>Trip Builder</span>
           </Link>
 
-          <Link href="/provider/dashboard" className="dashboard__nav-item" style={{ color: 'var(--color-accent)' }}>
-            <span>🏢</span> Operator Portal
+          <Link href="/provider/dashboard" className="dashboard__nav-item flex items-center gap-2.5" style={{ color: 'var(--color-accent)' }}>
+            <Building2 size={18} strokeWidth={1.8} className="shrink-0" />
+            <span>Operator Portal</span>
           </Link>
 
-          <Link href="/admin" className="dashboard__nav-item" style={{ color: '#ffc107' }}>
-            <span>⚙</span> Admin Console
+          <Link href="/admin" className="dashboard__nav-item flex items-center gap-2.5" style={{ color: '#ffc107' }}>
+            <Settings size={18} strokeWidth={1.8} className="shrink-0" />
+            <span>Admin Console</span>
           </Link>
 
-          <Link href="/" className="dashboard__nav-item mt-auto pt-6 border-t border-[var(--border-color)]">
-            <span>←</span> Back to Public Site
+          <Link href="/" className="dashboard__nav-item mt-auto pt-6 border-t border-[var(--border-color)] flex items-center gap-2.5">
+            <ArrowLeft size={18} strokeWidth={1.8} className="shrink-0" />
+            <span>Back to Public Site</span>
           </Link>
         </aside>
 
@@ -188,7 +222,7 @@ export default function DashboardPage() {
                         className="card--info reveal p-6 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-color)] hover:border-[var(--color-accent)] transition-all block cursor-pointer"
                       >
                         <span className="card__label">{card.label}</span>
-                        <div className="card__icon text-2xl my-2 text-[var(--color-accent)]">{card.icon}</div>
+                        <div className="card__icon text-2xl my-2 text-[var(--color-accent)]"><card.icon size={26} strokeWidth={1.8} /></div>
                         <h4 className="card__title font-bold text-white text-base">{card.title}</h4>
                         <p className="card__desc text-xs text-[var(--text-secondary)] mt-1">{card.subtitle}</p>
                       </Link>
@@ -199,7 +233,7 @@ export default function DashboardPage() {
                         className="card--info reveal p-6 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-color)] hover:border-[var(--color-accent)] transition-all block cursor-pointer"
                       >
                         <span className="card__label">{card.label}</span>
-                        <div className="card__icon text-2xl my-2 text-[var(--color-accent)]">{card.icon}</div>
+                        <div className="card__icon text-2xl my-2 text-[var(--color-accent)]"><card.icon size={26} strokeWidth={1.8} /></div>
                         <h4 className="card__title font-bold text-white text-base">{card.title}</h4>
                         <p className="card__desc text-xs text-[var(--text-secondary)] mt-1">{card.subtitle}</p>
                       </div>
@@ -238,10 +272,10 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex gap-3 flex-wrap">
-                    <Link href="/itinerary" className="btn btn--secondary btn--sm">
-                      View Day-by-Day Itinerary &rarr;
+                    <Link href="/itinerary" className="btn btn--secondary btn--sm inline-flex items-center gap-1.5">
+                      View Day-by-Day Itinerary <ArrowRight size={14} strokeWidth={1.8} />
                     </Link>
-                    <Link href="/confirmation" className="btn btn--ghost btn--sm">
+                    <Link href="/confirmation?ref=TJ-784219" className="btn btn--ghost btn--sm">
                       View Booking Voucher
                     </Link>
                     <button onClick={() => setActiveTab('packing')} className="btn btn--ghost btn--sm">
@@ -263,7 +297,18 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div>
-                    <button className="btn btn--secondary btn--sm">Write Operator Review</button>
+                    {reviewSuccess ? (
+                      <span className="badge inline-flex items-center gap-1 bg-emerald-500/15 text-emerald-400 py-1.5 px-3">
+                        <Check size={13} /> Reviewed ★★★★★ (Thank you!)
+                      </span>
+                    ) : (
+                      <button
+                        className="btn btn--secondary btn--sm"
+                        onClick={() => setShowReviewModal(true)}
+                      >
+                        Write Operator Review
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -374,8 +419,8 @@ export default function DashboardPage() {
                   <span className="badge mb-2">Saved Escapes</span>
                   <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-wider text-white">Your Wishlist</h1>
                 </div>
-                <Link href="/explore" className="btn btn--secondary btn--sm">
-                  Browse More &rarr;
+                <Link href="/explore" className="btn btn--secondary btn--sm inline-flex items-center gap-1.5">
+                  Browse More <ArrowRight size={14} strokeWidth={1.8} />
                 </Link>
               </div>
 
@@ -386,28 +431,28 @@ export default function DashboardPage() {
                     loc: 'Rishikesh, Uttarakhand',
                     price: '₹3,750',
                     img: 'https://images.unsplash.com/photo-1521334884684-d80222895322?w=600&q=80',
-                    link: '/adventure/rishikesh-bungee-jump'
+                    link: '/adventure/bungee'
                   },
                   {
                     title: 'Solang Valley High Tandem Paragliding',
                     loc: 'Manali, Himachal Pradesh',
                     price: '₹3,200',
                     img: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=600&q=80',
-                    link: '/adventure/manali-paragliding'
+                    link: '/adventure/paragliding'
                   },
                   {
-                    title: 'Zanskar River High Ice Chaddar Trek',
-                    loc: 'Leh, Ladakh',
-                    price: '₹42,000',
+                    title: 'Hampta Pass High Altitude Trek',
+                    loc: 'Manali, Himachal Pradesh',
+                    price: '₹8,499',
                     img: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80',
-                    link: '/adventure/zanskar-chadar-trek'
+                    link: '/adventure/trekking'
                   },
                   {
-                    title: 'Wildernest Nature Resort Eco-Cottage',
-                    loc: 'Goa Hinterlands',
-                    price: '₹7,500',
+                    title: 'Portuguese Heritage Villa',
+                    loc: 'Goa',
+                    price: '₹9,200',
                     img: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80',
-                    link: '/stay/wildernest-goa'
+                    link: '/stay/heritage-villa'
                   }
                 ].map((item, idx) => (
                   <div key={idx} className="card--info p-0 overflow-hidden flex flex-col justify-between">
@@ -415,12 +460,15 @@ export default function DashboardPage() {
                     <div className="p-4 flex-1 flex flex-col justify-between">
                       <div>
                         <h4 className="font-bold text-white text-base mb-1">{item.title}</h4>
-                        <p className="text-xs text-[var(--text-muted)] mb-3">📍 {item.loc}</p>
+                        <p className="text-xs text-[var(--text-muted)] mb-3 flex items-center gap-1">
+                          <MapPin size={12} strokeWidth={1.8} className="text-[var(--color-accent)] inline" /> {item.loc}
+                        </p>
                       </div>
                       <div className="flex justify-between items-center pt-3 border-t border-[var(--border-color)]">
                         <span className="font-bold text-[var(--color-accent)]">{item.price}</span>
-                        <Link href={item.link} className="btn btn--primary btn--sm">
-                          Book Now &rarr;
+                        <Link href={item.link} className="btn btn--primary btn--sm flex items-center gap-1">
+                          <span>Book Now</span>
+                          <ArrowRight size={13} strokeWidth={2} />
                         </Link>
                       </div>
                     </div>
@@ -432,6 +480,121 @@ export default function DashboardPage() {
 
         </main>
       </div>
+
+      {/* Operator Review Modal */}
+      {showReviewModal && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[9999]"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="review-modal-title"
+        >
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl max-w-lg w-full p-6 md:p-8 relative shadow-2xl">
+            <button
+              onClick={() => {
+                setShowReviewModal(false);
+                setReviewError('');
+              }}
+              aria-label="Close dialog"
+              className="absolute top-4 right-4 text-[var(--text-secondary)] hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            <span className="badge mb-2">Verified Expedition Review</span>
+            <h3 id="review-modal-title" className="text-xl md:text-2xl font-bold uppercase tracking-wider text-white mb-1">
+              Review Himalayan Expeditions
+            </h3>
+            <p className="text-xs text-[var(--text-muted)] mb-6">
+              Expedition: Hampta Pass High Altitude Crossing (June 2026)
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!reviewComment.trim() || reviewComment.trim().length < 5) {
+                  setReviewError('Please share at least a few words about your expedition experience.');
+                  return;
+                }
+                setIsSubmittingReview(true);
+                setTimeout(() => {
+                  setIsSubmittingReview(false);
+                  setReviewSuccess(true);
+                  setShowReviewModal(false);
+                }, 600);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs uppercase font-bold tracking-wider text-[var(--text-muted)] mb-2">
+                  Rating (1 to 5 Stars)
+                </label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      aria-label={`${star} star rating`}
+                      className={`p-2 rounded-lg border transition-all ${
+                        reviewRating >= star 
+                          ? 'border-amber-400 bg-amber-500/20 text-amber-400' 
+                          : 'border-[var(--border-color)] bg-[var(--bg-card)] text-gray-500 hover:text-white'
+                      }`}
+                    >
+                      <Star size={20} className={reviewRating >= star ? 'fill-amber-400' : ''} />
+                    </button>
+                  ))}
+                  <span className="self-center ml-2 text-sm font-bold text-white">
+                    {reviewRating} of 5 Stars
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="review-comment" className="block text-xs uppercase font-bold tracking-wider text-[var(--text-muted)] mb-2">
+                  Your Feedback *
+                </label>
+                <textarea
+                  id="review-comment"
+                  required
+                  rows={4}
+                  value={reviewComment}
+                  onChange={(e) => {
+                    setReviewComment(e.target.value);
+                    if (reviewError) setReviewError('');
+                  }}
+                  placeholder="Share details about guide safety, camping gear, mountain trails, and overall journey management..."
+                  className="w-full p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[var(--color-accent)]"
+                />
+              </div>
+
+              {reviewError && (
+                <p className="text-xs text-red-400">
+                  {reviewError}
+                </p>
+              )}
+
+              <div className="flex gap-3 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowReviewModal(false)}
+                  className="btn btn--secondary btn--sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingReview}
+                  className="btn btn--primary btn--sm inline-flex items-center gap-1.5"
+                >
+                  {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

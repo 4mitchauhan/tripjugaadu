@@ -1,596 +1,928 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { DESTINATIONS } from '@/lib/data';
+import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
+import { useTrip } from '@/context/TripContext';
 import { useLocale } from '@/context/LocaleContext';
+import { DESTINATIONS, ADVENTURES, STAYS, EXPERIENCES } from '@/lib/data';
+import {
+  Compass,
+  Calendar,
+  Users,
+  MapPin,
+  Clock,
+  Star,
+  Plus,
+  Trash2,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  AlertCircle,
+  Heart,
+  Search,
+  ExternalLink,
+  ShieldCheck,
+  Layers,
+  Wallet,
+  ShoppingBag,
+} from 'lucide-react';
 
 export default function TripBuilderPage() {
-  const router = useRouter();
-  const { formatPrice, t } = useLocale();
+  const {
+    trip,
+    tripCount,
+    estimatedTotal,
+    addToTrip,
+    removeFromTrip,
+    assignToDay,
+    unassignFromDay,
+    moveToDay,
+    addDay,
+    removeDay,
+    setDates,
+    setTravelers,
+    setBudgetLimit,
+    setTripTitle,
+    setDestination,
+    toggleFavorite,
+    isFavorite,
+    isInTrip,
+    saveTripToAccount,
+  } = useTrip();
 
-  const [currentStep, setCurrentStep] = useState<number>(1);
-  const [selectedDest, setSelectedDest] = useState<string>('rishikesh');
-  const [checkIn, setCheckIn] = useState<string>('2026-10-12');
-  const [checkOut, setCheckOut] = useState<string>('2026-10-15');
-  const [adults, setAdults] = useState<number>(2);
-  const [children, setChildren] = useState<number>(0);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([
-    'Rafting & Rapids',
-    'Mountain Trails',
-    'Riverside Cafes'
-  ]);
-  const [budgetTier, setBudgetTier] = useState<string>('EXPLORER');
-  const [aiPrompt, setAiPrompt] = useState<string>('');
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [aiProposal, setAiProposal] = useState<any>(null);
+  const { formatPrice } = useLocale();
 
-  // Group Collaboration & Bill Splitting State (Phase 6)
-  const [collaborators, setCollaborators] = useState<Array<{ name: string; email: string; role: string }>>([
-    { name: 'Arjun Verma (You)', email: 'arjun@tripjugaadu.com', role: 'OWNER' },
-    { name: 'Pooja Hegde', email: 'pooja@gmail.com', role: 'EDITOR' },
-    { name: 'Karan Mehra', email: 'karan@outlook.com', role: 'VIEWER' },
-  ]);
-  const [newCollabName, setNewCollabName] = useState('');
-  const [newCollabEmail, setNewCollabEmail] = useState('');
-  const [newCollabRole, setNewCollabRole] = useState('EDITOR');
-  const [showCollabModal, setShowCollabModal] = useState(false);
-  const [votes, setVotes] = useState<Record<string, number>>({
-    rafting: 3,
-    bungee: 1,
-    camping: 2,
-  });
+  // Active view tab: 'builder' | 'discover' | 'budget'
+  const [activeTab, setActiveTab] = useState<'builder' | 'discover' | 'budget'>('builder');
 
-  const handleAddCollaborator = () => {
-    if (!newCollabName || !newCollabEmail) return;
-    setCollaborators(prev => [...prev, { name: newCollabName, email: newCollabEmail, role: newCollabRole }]);
-    setNewCollabName('');
-    setNewCollabEmail('');
-  };
+  // Discovery Filter & Search States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedDestination, setSelectedDestination] = useState<string>('All');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('All');
+  const [sortBy, setSortBy] = useState<'relevance' | 'price-asc' | 'price-desc' | 'rating'>('relevance');
 
-  const handleVote = (activityKey: string) => {
-    setVotes(prev => ({
-      ...prev,
-      [activityKey]: (prev[activityKey] || 0) + 1,
-    }));
-  };
+  // Modal States
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showBookModal, setShowBookModal] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<string>('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [guestEmail, setGuestEmail] = useState('');
 
+  // Combined Catalog of Authoritative Items
+  const catalogItems = useMemo(() => {
+    const list: Array<any & { itemType: 'adventure' | 'stay' | 'experience' }> = [];
 
-  const handleAiAutoPlan = async (customText?: string) => {
-    const text = customText || aiPrompt || '3 days in Rishikesh with rafting and river camp under 15000';
-    setIsGenerating(true);
-
-    try {
-      const res = await fetch('http://localhost:4000/api/v1/ai/plan-trip', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: text }),
+    ADVENTURES.forEach((adv) => {
+      list.push({
+        ...adv,
+        itemType: 'adventure',
+        category: adv.difficulty === 'Extreme' ? 'Bungee & Extreme' : adv.name.toLowerCase().includes('rafting') ? 'River Adventures' : 'Trekking & Hiking',
+        rating: '4.9',
+        reviewCount: 54,
+        reviewHighlight: 'Certified grade-IV river safety and top guides.',
+        verified: true,
       });
-      if (res.ok) {
-        const json = await res.json();
-        setAiProposal(json.data);
-        if (json.data.destination) {
-          setSelectedDest(json.data.destination.toLowerCase());
+    });
+
+    STAYS.forEach((stay) => {
+      list.push({
+        ...stay,
+        itemType: 'stay',
+        duration: 'Overnight',
+        category: 'Stays & Retreats',
+        reviewCount: 38,
+        reviewHighlight: 'Spectacular mountain vista with organic cuisine.',
+        verified: true,
+      });
+    });
+
+    EXPERIENCES.forEach((exp) => {
+      list.push({
+        ...exp,
+        itemType: 'experience',
+        price: '₹1,499',
+        category: 'Local & Cultural',
+        rating: '4.8',
+        reviewCount: 29,
+        reviewHighlight: 'Authentic local artisan immersion with certified host.',
+        verified: true,
+      });
+    });
+
+    return list;
+  }, []);
+
+  // Filtered & Sorted Catalog
+  const filteredCatalog = useMemo(() => {
+    return catalogItems
+      .filter((item) => {
+        // Search query
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          const matchName = item.name.toLowerCase().includes(q);
+          const matchLoc = item.location.toLowerCase().includes(q);
+          const matchDesc = (item.description || '').toLowerCase().includes(q);
+          if (!matchName && !matchLoc && !matchDesc) return false;
         }
-      }
+
+        // Category filter
+        if (selectedCategory !== 'All') {
+          if (selectedCategory === 'River Adventures') {
+            if (!item.name.toLowerCase().includes('rafting') && !item.name.toLowerCase().includes('scuba')) return false;
+          } else if (selectedCategory === 'Trekking & Hiking') {
+            if (!item.name.toLowerCase().includes('trekking') && !item.name.toLowerCase().includes('pass')) return false;
+          } else if (selectedCategory === 'Bungee & Extreme') {
+            if (!item.name.toLowerCase().includes('bungee') && !item.name.toLowerCase().includes('zipline') && !item.name.toLowerCase().includes('paragliding')) return false;
+          } else if (selectedCategory === 'Stays & Retreats') {
+            if (item.itemType !== 'stay') return false;
+          } else if (selectedCategory === 'Local & Cultural') {
+            if (item.itemType !== 'experience') return false;
+          }
+        }
+
+        // Destination filter
+        if (selectedDestination !== 'All') {
+          if (!item.location.toLowerCase().includes(selectedDestination.toLowerCase())) return false;
+        }
+
+        // Difficulty filter
+        if (selectedDifficulty !== 'All') {
+          if (item.difficulty !== selectedDifficulty) return false;
+        }
+
+        return true;
+      })
+      .sort((a, b) => {
+        const priceA = parseInt(a.price.replace(/[^0-9]/g, '') || '0', 10);
+        const priceB = parseInt(b.price.replace(/[^0-9]/g, '') || '0', 10);
+        const ratingA = parseFloat(a.rating || '4.5');
+        const ratingB = parseFloat(b.rating || '4.5');
+
+        if (sortBy === 'price-asc') return priceA - priceB;
+        if (sortBy === 'price-desc') return priceB - priceA;
+        if (sortBy === 'rating') return ratingB - ratingA;
+        return 0; // relevance
+      });
+  }, [catalogItems, searchQuery, selectedCategory, selectedDestination, selectedDifficulty, sortBy]);
+
+  // Handle Save Trip Modal Submission
+  const handleSaveTrip = async () => {
+    setIsSaving(true);
+    setSaveStatus('');
+    try {
+      const res = await saveTripToAccount();
+      setSaveStatus(res.message);
+      setTimeout(() => {
+        setShowSaveModal(false);
+        setSaveStatus('');
+      }, 2000);
     } catch {
-      // Fallback
+      setSaveStatus('Guest draft saved locally to your device browser.');
     } finally {
-      setIsGenerating(false);
+      setIsSaving(false);
     }
   };
 
-  const interestsList = [
-    'Rafting & Rapids',
-    'Mountain Trails',
-    'Bungee & High Drops',
-    'Spiritual & Ganga Aarti',
-    'Riverside Cafes',
-    'Yoga & Sound Healing',
-    'Heritage & Monasteries',
-    'Local Street Food'
-  ];
-
-  const toggleInterest = (item: string) => {
-    setSelectedInterests(prev =>
-      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
-    );
+  // Helper to format date strings for days
+  const getDayDateLabel = (dayNumber: number): string => {
+    if (!trip.startDate) {
+      return `Day 0${dayNumber}`;
+    }
+    try {
+      const start = new Date(trip.startDate);
+      if (isNaN(start.getTime())) return `Day 0${dayNumber}`;
+      const dayDate = new Date(start);
+      dayDate.setDate(dayDate.getDate() + (dayNumber - 1));
+      const formatted = dayDate.toLocaleDateString('en-IN', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
+      return `Day 0${dayNumber} — ${formatted}`;
+    } catch {
+      return `Day 0${dayNumber}`;
+    }
   };
 
-  const handleFinish = () => {
-    // Navigate to itinerary
-    router.push('/itinerary');
-  };
+  // Pricing calculations
+  const totalSubtotal = estimatedTotal;
+  const estimatedTaxes = Math.round(totalSubtotal * 0.18);
+  const grandTotal = totalSubtotal + estimatedTaxes;
+  const isOverBudget = trip.budgetLimit !== null && grandTotal > trip.budgetLimit;
+  const budgetDiff = trip.budgetLimit !== null ? grandTotal - trip.budgetLimit : 0;
 
   return (
-    <div className="pt-24 pb-20">
-      <section className="section pt-6 text-center">
-        <div className="container max-w-4xl">
-          <div className="section__header reveal text-center">
-            <span className="badge mb-3">Intelligent Journey Architect</span>
-            <h1 className="section__title">Build Your Journey</h1>
-            <p className="section__subtitle max-w-xl mx-auto">
-              You bring the idea. We build the itinerary, prepare your requirements, and organize certified services.
+    <div className="pt-24 pb-24 min-h-screen">
+      <div className="container max-w-6xl">
+        {/* Header Breadcrumb & Identity */}
+        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="badge">MANUAL ITINERARY ARCHITECT</span>
+              <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                100% TRAVELER CONTROLLED
+              </span>
+            </div>
+            <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-wider text-white">
+              {trip.title || 'Personalized Adventure Itinerary'}
+            </h1>
+            <p className="text-xs md:text-sm text-[var(--text-secondary)] mt-1">
+              Discover freely · Choose personally · Build manually · Book confidently.
             </p>
           </div>
 
-          <div className="trip-builder reveal mt-8">
-            {/* AI Auto-Plan Intelligence Banner */}
-            <div 
-              style={{
-                marginBottom: 'var(--space-8)',
-                padding: 'var(--space-6)',
-                background: 'linear-gradient(135deg, rgba(7, 27, 58, 0.7), rgba(1, 6, 17, 0.8))',
-                border: '1px solid rgba(0, 174, 239, 0.4)',
-                borderRadius: 'var(--radius-lg)',
-                textAlign: 'left',
-              }}
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowSaveModal(true)}
+              className="btn btn--secondary btn--sm inline-flex items-center gap-1.5"
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
-                <span className="badge" style={{ background: 'rgba(0, 174, 239, 0.15)', color: 'var(--color-accent)' }}>
-                  ⚡ AI EXPEDITION ARCHITECT
-                </span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                  Grounded in Verified Operator Capacity & Schedules
-                </span>
-              </div>
-              <h3 style={{ fontSize: 'var(--text-lg)', color: '#fff', marginBottom: 'var(--space-1)', textTransform: 'uppercase' }}>
-                Instant Multi-Day Trip Generation
-              </h3>
-              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--space-4)' }}>
-                Describe your dream escape in natural language or pick a sample prompt. The AI will pull real slots, stays, and activities.
-              </p>
+              <CheckCircle2 size={14} className="text-[var(--color-accent)]" />
+              <span>{trip.isSavedToAccount ? 'Saved to Account' : 'Save Trip to Account'}</span>
+            </button>
+            <button
+              type="button"
+              disabled={tripCount === 0}
+              onClick={() => setShowBookModal(true)}
+              className={`btn btn--primary btn--sm inline-flex items-center gap-1.5 ${tripCount === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+            >
+              <ShoppingBag size={14} />
+              <span>Review & Book ({tripCount})</span>
+            </button>
+          </div>
+        </div>
 
-              <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-4)', flexWrap: 'wrap' }}>
-                {[
-                  '3 days in Rishikesh with rafting and river camp under 15000',
-                  'Weekend paragliding & cafe crawl in Manali for 2',
-                  'Relaxing cultural & temple journey in Ladakh for 5 days',
-                ].map((smp, i) => (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      setAiPrompt(smp);
-                      handleAiAutoPlan(smp);
-                    }}
-                    style={{
-                      fontSize: '11px',
-                      padding: '4px 10px',
-                      borderRadius: '9999px',
-                      background: 'rgba(0, 174, 239, 0.08)',
-                      border: '1px solid rgba(0, 174, 239, 0.25)',
-                      color: 'var(--color-accent)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    "{smp}"
-                  </button>
-                ))}
-              </div>
+        {/* Global Navigation Tabs: Builder / Discover / Budget Breakdown */}
+        <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-3 mb-8 overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setActiveTab('builder')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all inline-flex items-center gap-2 shrink-0 ${
+              activeTab === 'builder'
+                ? 'bg-[var(--color-accent)] text-[#010611] shadow-lg shadow-cyan-500/20'
+                : 'bg-white/5 text-[var(--text-secondary)] hover:text-white'
+            }`}
+          >
+            <Layers size={14} />
+            <span>Itinerary Board ({tripCount})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('discover')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all inline-flex items-center gap-2 shrink-0 ${
+              activeTab === 'discover'
+                ? 'bg-[var(--color-accent)] text-[#010611] shadow-lg shadow-cyan-500/20'
+                : 'bg-white/5 text-[var(--text-secondary)] hover:text-white'
+            }`}
+          >
+            <Compass size={14} />
+            <span>Discover & Add Experiences</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('budget')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all inline-flex items-center gap-2 shrink-0 ${
+              activeTab === 'budget'
+                ? 'bg-[var(--color-accent)] text-[#010611] shadow-lg shadow-cyan-500/20'
+                : 'bg-white/5 text-[var(--text-secondary)] hover:text-white'
+            }`}
+          >
+            <Wallet size={14} />
+            <span>Itemized Cost & Budget ({formatPrice(grandTotal)})</span>
+          </button>
+        </div>
 
-              <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
-                <input
-                  type="text"
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  placeholder="e.g. 3 days in Rishikesh with Grade IV rafting, bungee, and luxury camp under ₹18,000..."
-                  style={{
-                    flex: 1,
-                    minWidth: '260px',
-                    padding: 'var(--space-3)',
-                    background: 'var(--bg-primary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-md)',
-                    color: '#fff',
-                    fontSize: 'var(--text-xs)',
-                    outline: 'none',
-                  }}
-                />
-                <button
-                  onClick={() => handleAiAutoPlan()}
-                  disabled={isGenerating}
-                  className="btn btn--primary"
-                  style={{ fontSize: 'var(--text-xs)' }}
+        {/* TAB 1: ITINERARY BOARD */}
+        {activeTab === 'builder' && (
+          <div className="space-y-8">
+            <div className="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+              <div>
+                <label className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold block mb-1">
+                  Trip Destination
+                </label>
+                <select
+                  value={trip.destination}
+                  onChange={(e) => setDestination(e.target.value)}
+                  className="auth-form__input py-2 text-xs"
                 >
-                  {isGenerating ? 'Synthesizing...' : 'Generate with AI →'}
-                </button>
-              </div>
-
-              {/* Proposal Preview if generated */}
-              {aiProposal && (
-                <div
-                  style={{
-                    marginTop: 'var(--space-5)',
-                    padding: 'var(--space-4)',
-                    background: 'var(--bg-primary)',
-                    border: '1px solid var(--color-accent)',
-                    borderRadius: 'var(--radius-md)',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2)' }}>
-                    <div>
-                      <span className="badge" style={{ fontSize: '10px', marginRight: '6px' }}>{aiProposal.travelStyle}</span>
-                      <strong style={{ color: '#fff', fontSize: 'var(--text-sm)' }}>{aiProposal.title}</strong>
-                    </div>
-                    <div style={{ color: 'var(--color-accent)', fontWeight: 700, fontSize: 'var(--text-sm)' }}>
-                      Total: ~₹{aiProposal.totalEstimatedBudget.toLocaleString()}
-                    </div>
-                  </div>
-
-                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--space-3)' }}>
-                    {aiProposal.readinessSummary}
-                  </p>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
-                    {aiProposal.days.map((d: any) => (
-                      <div key={d.dayNumber} style={{ padding: 'var(--space-3)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', fontSize: '11px' }}>
-                        <div style={{ color: 'var(--color-accent)', fontWeight: 700 }}>Day {d.dayNumber}: {d.theme}</div>
-                        <div style={{ color: '#fff', marginTop: '2px' }}>• {d.morningActivity?.title}</div>
-                        <div style={{ color: 'var(--text-muted)', marginTop: '2px' }}>• {d.afternoonActivity?.title}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
-                    <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                      {aiProposal.disclaimer}
-                    </span>
-                    <button
-                      onClick={handleFinish}
-                      className="btn btn--primary btn--sm"
-                    >
-                      Adopt Plan & Open Interactive Itinerary →
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Steps Progress */}
-            <div className="steps mb-10" id="trip-steps">
-              {[
-                { num: 1, label: 'Destination' },
-                { num: 2, label: 'Dates' },
-                { num: 3, label: 'Travelers' },
-                { num: 4, label: 'Interests' },
-                { num: 5, label: 'Budget' },
-              ].map((s) => (
-                <div
-                  key={s.num}
-                  onClick={() => setCurrentStep(s.num)}
-                  className={`step cursor-pointer ${
-                    currentStep === s.num ? 'step--active' : currentStep > s.num ? 'step--completed' : ''
-                  }`}
-                >
-                  <span className="mr-2 opacity-60">0{s.num}</span> {s.label}
-                </div>
-              ))}
-            </div>
-
-            {/* Step 1: Destination Selection */}
-            {currentStep === 1 && (
-              <div className="step-panel animate-fadeIn">
-                <span className="label label--accent mb-4 inline-block">Step 01 — Choose Destination</span>
-                <div className="trip-builder__destinations mt-4">
                   {DESTINATIONS.map((d) => (
+                    <option key={d.id} value={d.name}>
+                      {d.name} ({d.region})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold block mb-1">
+                  Start Date (Optional)
+                </label>
+                <input
+                  type="date"
+                  value={trip.startDate}
+                  onChange={(e) => setDates(e.target.value, trip.endDate)}
+                  className="auth-form__input py-2 text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold block mb-1">
+                  End Date (Optional)
+                </label>
+                <input
+                  type="date"
+                  value={trip.endDate}
+                  onChange={(e) => setDates(trip.startDate, e.target.value)}
+                  className="auth-form__input py-2 text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold block mb-1">
+                  Travelers ({trip.travelers})
+                </label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setTravelers(Math.max(1, trip.travelers - 1))}
+                    className="btn btn--secondary w-8 h-8 p-0 flex items-center justify-center text-sm font-bold"
+                  >
+                    −
+                  </button>
+                  <span className="font-mono text-sm font-bold text-white w-6 text-center">
+                    {trip.travelers.toString().padStart(2, '0')}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setTravelers(trip.travelers + 1)}
+                    className="btn btn--secondary w-8 h-8 p-0 flex items-center justify-center text-sm font-bold"
+                  >
+                    +
+                  </button>
+                  <span className="text-xs text-[var(--text-muted)] ml-2">Expedition Group</span>
+                </div>
+              </div>
+            </div>
+
+            {/* EMPTY STATE */}
+            {tripCount === 0 && (
+              <div className="p-12 text-center rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)]">
+                <div className="w-16 h-16 mx-auto rounded-full bg-[var(--color-accent-dim)] border border-[var(--color-accent)] flex items-center justify-center text-[var(--color-accent)] mb-4">
+                  <Compass size={32} />
+                </div>
+                <h3 className="text-2xl font-bold uppercase tracking-wider text-white mb-2">
+                  Your adventure starts here.
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] max-w-lg mx-auto mb-6">
+                  Explore destinations, discover verified outdoor experiences, and add the ones you love to your itinerary.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('discover')}
+                  className="btn btn--primary inline-flex items-center gap-2"
+                >
+                  <Compass size={16} /> Explore Experiences
+                </button>
+                <div className="flex items-center justify-center gap-6 mt-8 pt-6 border-t border-[var(--border-color)] text-xs text-[var(--text-muted)] flex-wrap">
+                  <span className="inline-flex items-center gap-1.5">
+                    <ShieldCheck size={14} className="text-[var(--color-accent)]" /> 100% Free exploration
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check size={14} className="text-emerald-400" /> Transparent operator pricing
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Calendar size={14} className="text-amber-400" /> Flexible day assignment
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* UNSCHEDULED TRAY */}
+            {trip.unscheduledItems.length > 0 && (
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-[rgba(0,174,239,0.06)] to-[rgba(7,27,58,0.4)] border border-[var(--color-accent)]/30">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-accent)] animate-pulse"></span>
+                    <h3 className="font-bold text-white uppercase text-sm tracking-wider">
+                      Unscheduled Experiences ({trip.unscheduledItems.length})
+                    </h3>
+                  </div>
+                  <span className="text-xs text-[var(--text-secondary)]">
+                    Assign these activities to specific days below when ready.
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {trip.unscheduledItems.map((item) => (
                     <div
-                      key={d.id}
-                      onClick={() => setSelectedDest(d.id)}
-                      className={`trip-builder__dest-card cursor-pointer transition-all ${
-                        selectedDest === d.id ? 'trip-builder__dest-card--active ring-2 ring-[var(--color-accent)]' : ''
-                      }`}
+                      key={item.id}
+                      className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex flex-col justify-between"
                     >
-                      <img src={d.image} alt={d.name} loading="lazy" />
-                      <div className="name font-bold uppercase">{d.name}</div>
+                      <div>
+                        <div className="relative h-28 rounded-lg overflow-hidden mb-3">
+                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          <span className="absolute top-2 left-2 badge text-[10px] uppercase">
+                            {item.type}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeFromTrip(item.id)}
+                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-rose-900/80 text-white flex items-center justify-center transition-all"
+                            title="Remove from Trip"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                        <h4 className="font-bold text-white text-sm line-clamp-1">{item.name}</h4>
+                        <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] mt-1">
+                          <span className="inline-flex items-center gap-1"><MapPin size={11} /> {item.location}</span>
+                          <span>·</span>
+                          <span className="inline-flex items-center gap-1"><Clock size={11} /> {item.duration}</span>
+                        </div>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="font-semibold text-xs text-[var(--color-accent)]">{item.price}</span>
+                          <span className="inline-flex items-center gap-1 text-[11px] text-amber-400">
+                            <Star size={11} className="fill-amber-400" /> {item.rating}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-[var(--border-color)]">
+                        <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold block mb-1.5">
+                          Assign to Itinerary Day:
+                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {trip.days.map((day) => (
+                            <button
+                              key={day.dayNumber}
+                              type="button"
+                              onClick={() => assignToDay(item.id, day.dayNumber)}
+                              className="px-2.5 py-1 rounded bg-white/5 hover:bg-[var(--color-accent)] hover:text-[#010611] text-xs font-semibold text-white border border-white/10 transition-all"
+                            >
+                              Day {day.dayNumber}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              addDay();
+                              assignToDay(item.id, trip.days.length + 1);
+                            }}
+                            className="px-2 py-1 rounded bg-[var(--color-accent-dim)] hover:bg-[var(--color-accent)] hover:text-[#010611] text-[11px] font-semibold text-[var(--color-accent)] transition-all"
+                          >
+                            + New Day
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Step 2: Dates */}
-            {currentStep === 2 && (
-              <div className="step-panel animate-fadeIn">
-                <span className="label label--accent mb-4 inline-block">Step 02 — Select Travel Dates</span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-md mx-auto mt-6 text-left">
-                  <div>
-                    <label className="auth-form__label">Check-in Date</label>
-                    <input
-                      type="date"
-                      className="auth-form__input"
-                      value={checkIn}
-                      onChange={(e) => setCheckIn(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="auth-form__label">Check-out Date</label>
-                    <input
-                      type="date"
-                      className="auth-form__input"
-                      value={checkOut}
-                      onChange={(e) => setCheckOut(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Travelers */}
-            {currentStep === 3 && (
-              <div className="step-panel animate-fadeIn">
-                <span className="label label--accent mb-4 inline-block">Step 03 — How Many Travelers?</span>
-                <div className="flex justify-center gap-12 mt-8">
-                  <div className="text-center">
-                    <span className="label block mb-3">Adults (12+ yrs)</span>
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => setAdults(Math.max(1, adults - 1))}
-                        className="btn btn--secondary w-10 h-10 p-0 flex items-center justify-center font-bold text-lg"
-                      >
-                        −
-                      </button>
-                      <span className="font-mono text-2xl font-bold text-white w-8">{adults.toString().padStart(2, '0')}</span>
-                      <button
-                        onClick={() => setAdults(adults + 1)}
-                        className="btn btn--secondary w-10 h-10 p-0 flex items-center justify-center font-bold text-lg"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="text-center">
-                    <span className="label block mb-3">Children</span>
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => setChildren(Math.max(0, children - 1))}
-                        className="btn btn--secondary w-10 h-10 p-0 flex items-center justify-center font-bold text-lg"
-                      >
-                        −
-                      </button>
-                      <span className="font-mono text-2xl font-bold text-white w-8">{children.toString().padStart(2, '0')}</span>
-                      <button
-                        onClick={() => setChildren(children + 1)}
-                        className="btn btn--secondary w-10 h-10 p-0 flex items-center justify-center font-bold text-lg"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 4: Interests */}
-            {currentStep === 4 && (
-              <div className="step-panel animate-fadeIn">
-                <span className="label label--accent mb-4 inline-block">Step 04 — Select Activity Interests</span>
-                <p className="text-xs text-[var(--text-secondary)] mb-6">Select the adventure and travel styles you wish to prioritize.</p>
-                <div className="flex flex-wrap gap-3 justify-center max-w-xl mx-auto">
-                  {interestsList.map((interest) => (
-                    <button
-                      key={interest}
-                      onClick={() => toggleInterest(interest)}
-                      className={`tag cursor-pointer px-4 py-2 text-sm ${
-                        selectedInterests.includes(interest) ? 'tag--active' : ''
-                      }`}
-                    >
-                      {interest}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Step 5: Budget Tier */}
-            {currentStep === 5 && (
-              <div className="step-panel animate-fadeIn">
-                <span className="label label--accent mb-4 inline-block">Step 05 — Estimated Budget Tier</span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto mt-6">
-                  {[
-                    { id: 'BACKPACKER', name: 'Backpacker', range: '₹5K – ₹15K', desc: 'Hostels, shared treks, local buses' },
-                    { id: 'EXPLORER', name: 'Explorer', range: '₹15K – ₹35K', desc: 'Boutique stays, private rafting, SUV transfers' },
-                    { id: 'LUXURY', name: 'Luxury Sanctuary', range: '₹35K+', desc: '5-star resorts, private guides, all-inclusive' }
-                  ].map((tier) => (
-                    <div
-                      key={tier.id}
-                      onClick={() => setBudgetTier(tier.id)}
-                      className={`p-6 rounded-2xl border cursor-pointer transition-all text-left ${
-                        budgetTier === tier.id
-                          ? 'border-[var(--color-accent)] bg-[var(--color-accent-dim)]'
-                          : 'border-[var(--border-color)] bg-[var(--bg-card)]'
-                      }`}
-                    >
-                      <h4 className="font-bold text-white uppercase text-base">{tier.name}</h4>
-                      <p className="text-lg font-bold text-[var(--color-accent)] my-2">{tier.range}</p>
-                      <p className="text-xs text-[var(--text-secondary)]">{tier.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Phase 6: Group Collaboration & Bill Splitting Widget */}
-            <div 
-              style={{
-                marginTop: 'var(--space-8)',
-                padding: 'var(--space-6)',
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid rgba(0, 174, 239, 0.3)',
-                borderRadius: 'var(--radius-lg)',
-                textAlign: 'left',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+            {/* DAY-BY-DAY SCHEDULE */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>👥 Group Travel Canvas & Bill Splitter</span>
-                    <span className="badge" style={{ fontSize: '9px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
-                      PHASE 6 COLLABORATION
-                    </span>
-                  </div>
-                  <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>
-                    Invite co-travelers, assign permissions, split expenses, and vote on activities.
+                  <h3 className="text-xl font-bold uppercase tracking-wider text-white">
+                    Day-by-Day Expedition Schedule
+                  </h3>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    Structure activities and stays into daily adventures. Add days or reorder freely.
                   </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setShowCollabModal(!showCollabModal)}
-                  className="btn btn--secondary btn--sm"
-                  style={{ fontSize: '11px', padding: '6px 12px' }}
+                  onClick={addDay}
+                  className="btn btn--secondary btn--sm inline-flex items-center gap-1.5"
                 >
-                  {showCollabModal ? 'Hide Invite Form' : '+ Invite Co-Traveler'}
+                  <Plus size={14} /> Add Another Day
                 </button>
               </div>
 
-              {/* Invite Form */}
-              {showCollabModal && (
-                <div style={{ padding: '12px', background: 'rgba(0,0,0,0.4)', borderRadius: '8px', marginBottom: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {trip.days.map((day) => {
+                const daySubtotal = day.items.reduce((acc, curr) => {
+                  return acc + (curr.type === 'stay' ? curr.numericPrice : curr.numericPrice * trip.travelers);
+                }, 0);
+
+                return (
+                  <div
+                    key={day.dayNumber}
+                    className="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] transition-all"
+                  >
+                    <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-4 mb-4 flex-wrap gap-3">
+                      <div className="flex items-center gap-3">
+                        <span className="w-8 h-8 rounded-lg bg-[var(--color-accent-dim)] border border-[var(--color-accent)] flex items-center justify-center font-bold text-xs text-[var(--color-accent)]">
+                          0{day.dayNumber}
+                        </span>
+                        <div>
+                          <h4 className="font-bold text-base text-white">
+                            {getDayDateLabel(day.dayNumber)}
+                          </h4>
+                          <span className="text-xs text-[var(--text-muted)]">
+                            {day.items.length} {day.items.length === 1 ? 'experience' : 'experiences'} planned
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-semibold text-[var(--color-accent)]">
+                          Day Subtotal: {formatPrice(daySubtotal)}
+                        </span>
+                        {trip.days.length > 1 && day.items.length === 0 && (
+                          <button
+                            type="button"
+                            onClick={() => removeDay(day.dayNumber)}
+                            className="text-xs text-rose-400 hover:text-rose-300 p-1 transition-all"
+                            title="Remove empty day"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {day.items.length === 0 ? (
+                      <div className="py-8 text-center border border-dashed border-[var(--border-color)] rounded-xl">
+                        <p className="text-xs text-[var(--text-muted)] mb-2">
+                          No activities assigned to this day yet.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('discover')}
+                          className="btn btn--secondary btn--sm inline-flex items-center gap-1.5 text-xs py-1"
+                        >
+                          <Compass size={13} /> Discover Activities
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {day.items.map((item, idx) => (
+                          <div
+                            key={`${item.id}-${idx}`}
+                            className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:border-[var(--color-accent)]/40 transition-all"
+                          >
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-14 h-14 rounded-lg object-cover shrink-0"
+                              />
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="badge text-[9px] uppercase px-1.5 py-0.5">
+                                    {item.type}
+                                  </span>
+                                  <span className="text-xs font-bold text-white line-clamp-1">
+                                    {item.name}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] mt-1">
+                                  <span>{item.location}</span>
+                                  <span>·</span>
+                                  <span>{item.duration}</span>
+                                  <span>·</span>
+                                  <span className="text-[var(--color-accent)] font-semibold">{item.price}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                              <select
+                                value={day.dayNumber}
+                                onChange={(e) => {
+                                  const target = parseInt(e.target.value, 10);
+                                  if (target !== day.dayNumber) {
+                                    moveToDay(item.id, day.dayNumber, target);
+                                  }
+                                }}
+                                className="auth-form__input py-1 px-2 text-xs w-auto bg-[#0a101d]"
+                              >
+                                {trip.days.map((d) => (
+                                  <option key={d.dayNumber} value={d.dayNumber}>
+                                    Move to Day {d.dayNumber}
+                                  </option>
+                                ))}
+                              </select>
+
+                              <button
+                                type="button"
+                                onClick={() => unassignFromDay(item.id, day.dayNumber)}
+                                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[var(--text-muted)] hover:text-white text-xs transition-all"
+                              >
+                                Unassign
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => removeFromTrip(item.id)}
+                                className="p-1.5 rounded-lg bg-white/5 hover:bg-rose-900/50 text-[var(--text-muted)] hover:text-rose-400 text-xs transition-all"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: DISCOVER */}
+        {activeTab === 'discover' && (
+          <div className="space-y-6">
+            <div className="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div className="md:col-span-2 relative">
+                  <Search size={16} className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" />
                   <input
                     type="text"
-                    value={newCollabName}
-                    onChange={(e) => setNewCollabName(e.target.value)}
-                    placeholder="Friend's Full Name"
-                    style={{ flex: 1, minWidth: '140px', padding: '8px 10px', background: '#0a101d', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff', fontSize: '12px' }}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search adventures, stays, rapids, paragliding..."
+                    className="auth-form__input pl-10 text-xs"
                   />
-                  <input
-                    type="email"
-                    value={newCollabEmail}
-                    onChange={(e) => setNewCollabEmail(e.target.value)}
-                    placeholder="Email address"
-                    style={{ flex: 1, minWidth: '160px', padding: '8px 10px', background: '#0a101d', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff', fontSize: '12px' }}
-                  />
+                </div>
+
+                <div>
                   <select
-                    value={newCollabRole}
-                    onChange={(e) => setNewCollabRole(e.target.value)}
-                    style={{ padding: '8px 10px', background: '#0a101d', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff', fontSize: '12px' }}
+                    value={selectedDestination}
+                    onChange={(e) => setSelectedDestination(e.target.value)}
+                    className="auth-form__input text-xs"
                   >
-                    <option value="EDITOR">EDITOR (Can suggest items)</option>
-                    <option value="VIEWER">VIEWER (Read-only)</option>
-                  </select>
-                  <button
-                    type="button"
-                    onClick={handleAddCollaborator}
-                    className="btn btn--primary btn--sm"
-                    style={{ padding: '8px 14px', fontSize: '11px' }}
-                  >
-                    Send Invite
-                  </button>
-                </div>
-              )}
-
-              {/* Collaborators List & Bill Split Calculation */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginBottom: '16px' }}>
-                <div style={{ padding: '12px', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '8px' }}>
-                    Active Trip Circle ({collaborators.length} Travelers)
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {collaborators.map((c, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: '#fff' }}>
-                        <span>{c.name}</span>
-                        <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: c.role === 'OWNER' ? 'rgba(234,179,8,0.2)' : 'rgba(255,255,255,0.08)', color: c.role === 'OWNER' ? '#eab308' : '#94a3b8' }}>
-                          {c.role}
-                        </span>
-                      </div>
+                    <option value="All">All Destinations</option>
+                    {DESTINATIONS.map((d) => (
+                      <option key={d.id} value={d.name}>
+                        {d.name}
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
 
-                {/* Live Bill Splitter */}
-                <div style={{ padding: '12px', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 600, color: '#10b981', textTransform: 'uppercase', marginBottom: '6px' }}>
-                    Automated Split-Bill Calculation
-                  </div>
-                  <div style={{ fontSize: '18px', fontWeight: 700, color: '#fff', marginBottom: '2px' }}>
-                    {formatPrice(Math.round((adults * 15000) / (collaborators.length || 1)))} <span style={{ fontSize: '11px', fontWeight: 400, color: 'var(--text-muted)' }}>per traveler</span>
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                    Total Estimated Group Budget: {formatPrice(adults * 15000)} split across {collaborators.length} members.
-                  </div>
+                <div>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="auth-form__input text-xs"
+                  >
+                    <option value="relevance">Sort: Recommended</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="rating">Top Rated</option>
+                  </select>
                 </div>
               </div>
 
-              {/* Group Activity Voting */}
-              <div>
-                <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  Group Activity Voting Consensus:
-                </div>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  {[
-                    { key: 'rafting', name: 'Grade IV Rafting Expedition', badge: 'High Adrenaline' },
-                    { key: 'bungee', name: '83m Bungee Jump', badge: 'Extreme' },
-                    { key: 'camping', name: 'Riverside Swiss Campfire', badge: 'Relaxed' },
-                  ].map((act) => (
-                    <div
-                      key={act.key}
-                      style={{
-                        padding: '8px 12px',
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '6px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        fontSize: '12px',
-                        color: '#fff',
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontWeight: 600 }}>{act.name}</div>
-                        <div style={{ fontSize: '10px', color: 'var(--color-accent)' }}>{act.badge}</div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleVote(act.key)}
-                        style={{
-                          background: 'rgba(0,174,239,0.2)',
-                          border: '1px solid var(--color-accent)',
-                          color: '#fff',
-                          borderRadius: '4px',
-                          padding: '4px 8px',
-                          fontSize: '11px',
-                          cursor: 'pointer',
-                          fontWeight: 700,
-                        }}
-                      >
-                        👍 {votes[act.key] || 0}
-                      </button>
-                    </div>
-                  ))}
-                </div>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {[
+                  'All',
+                  'River Adventures',
+                  'Trekking & Hiking',
+                  'Bungee & Extreme',
+                  'Stays & Retreats',
+                  'Local & Cultural',
+                ].map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`tag cursor-pointer text-xs px-3 py-1.5 shrink-0 ${
+                      selectedCategory === cat ? 'tag--active' : ''
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Controls */}
-            <div className="flex justify-between items-center mt-12 pt-6 border-t border-[var(--border-color)]">
-              <button
-                disabled={currentStep === 1}
-                onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
-                className={`btn btn--secondary ${currentStep === 1 ? 'opacity-40 cursor-not-allowed' : ''}`}
-              >
-                ← Previous Step
-              </button>
+            <div className="flex items-center justify-between text-xs text-[var(--text-muted)] px-1">
+              <span>Showing {filteredCatalog.length} verified experiences</span>
+            </div>
 
-              {currentStep < 5 ? (
-                <button
-                  onClick={() => setCurrentStep(prev => Math.min(5, prev + 1))}
-                  className="btn btn--primary"
-                >
-                  Continue to Next Step <span className="btn-arrow">→</span>
-                </button>
-              ) : (
-                <button
-                  onClick={handleFinish}
-                  className="btn btn--primary font-bold text-base px-8 shadow-lg shadow-cyan-500/20"
-                >
-                  Generate My Itinerary <span className="btn-arrow">→</span>
-                </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCatalog.map((item) => {
+                const inTripAlready = isInTrip(item.id);
+                const fav = isFavorite(item.id);
+
+                return (
+                  <div
+                    key={item.id}
+                    className="card--poster aspect-[3/4] block relative rounded-2xl overflow-hidden border border-[var(--border-color)] group"
+                  >
+                    <img
+                      className="card__image transition-transform duration-500 group-hover:scale-105"
+                      src={item.image}
+                      alt={item.name}
+                      loading="lazy"
+                    />
+                    <div className="card__overlay"></div>
+
+                    <div className="card__top-meta">
+                      <span className="badge text-[10px] uppercase">{item.category}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleFavorite(item.id);
+                        }}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                          fav ? 'bg-rose-500 text-white' : 'bg-black/40 text-white hover:bg-black/70'
+                        }`}
+                      >
+                        <Heart size={14} className={fav ? 'fill-white' : ''} />
+                      </button>
+                    </div>
+
+                    <div className="card__content">
+                      <div className="flex items-center gap-1.5 text-xs text-amber-400 mb-1">
+                        <Star size={12} className="fill-amber-400" />
+                        <span>{item.rating}</span>
+                        <span className="text-[var(--text-muted)]">({item.reviewCount || 42} reviews)</span>
+                      </div>
+                      <h3 className="card__title text-base font-bold text-white mb-1">{item.name}</h3>
+                      <p className="card__subtitle flex items-center gap-1 text-xs text-[var(--text-secondary)] mb-2">
+                        <MapPin size={11} /> {item.location} · {item.duration}
+                      </p>
+                      <p className="text-[11px] text-[var(--text-muted)] line-clamp-2 italic mb-3">
+                        &quot;{item.reviewHighlight}&quot;
+                      </p>
+
+                      <div className="flex justify-between items-center pt-2 border-t border-white/10 mt-auto">
+                        <div>
+                          <span className="text-xs text-[var(--text-muted)] block">Verified Operator</span>
+                          <span className="text-sm font-bold text-[var(--color-accent)]">{item.price}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={
+                              item.itemType === 'stay'
+                                ? `/stay/${item.id}`
+                                : item.itemType === 'experience'
+                                ? `/experience/${item.id}`
+                                : `/adventure/${item.id}`
+                            }
+                            className="btn btn--secondary btn--sm p-2"
+                          >
+                            <ExternalLink size={13} />
+                          </Link>
+
+                          <button
+                            type="button"
+                            onClick={() => addToTrip(item, item.itemType)}
+                            className={`btn btn--sm font-bold ${
+                              inTripAlready
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                                : 'btn--primary'
+                            }`}
+                          >
+                            {inTripAlready ? 'In Trip ✓' : '+ Add to Trip'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: BUDGET */}
+        {activeTab === 'budget' && (
+          <div className="space-y-6">
+            <div className="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-bold uppercase tracking-wider text-white">
+                    Optional Budget Ceiling
+                  </h3>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    Set a personal budget limit to track your adventure expenses. Non-blocking & flexible.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-xs text-[var(--text-muted)]">₹</span>
+                    <input
+                      type="number"
+                      placeholder="e.g. 25000"
+                      value={trip.budgetLimit || ''}
+                      onChange={(e) => {
+                        const val = e.target.value ? parseInt(e.target.value, 10) : null;
+                        setBudgetLimit(val);
+                      }}
+                      className="auth-form__input pl-7 text-xs w-36"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {isOverBudget && (
+                <div className="mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
+                  <AlertCircle size={18} className="text-amber-400 shrink-0 mt-0.5" />
+                  <div className="text-xs">
+                    <strong className="text-amber-300 block mb-0.5">
+                      Your current estimate is above your budget by {formatPrice(budgetDiff)}.
+                    </strong>
+                    <span className="text-[var(--text-secondary)]">
+                      You can review your selections or keep your trip as it is. TripJugaadu will never alter or remove your activities automatically.
+                    </span>
+                  </div>
+                </div>
               )}
+            </div>
+
+            <div className="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
+              <h3 className="text-base font-bold uppercase tracking-wider text-white mb-4">
+                Itemized Cost Breakdown ({trip.travelers} Travelers)
+              </h3>
+
+              <div className="pt-4 border-t border-[var(--border-color)] space-y-2 max-w-sm ml-auto text-xs">
+                <div className="flex justify-between text-[var(--text-secondary)]">
+                  <span>Services Base Subtotal</span>
+                  <span className="font-mono text-white">{formatPrice(totalSubtotal)}</span>
+                </div>
+                <div className="flex justify-between text-[var(--text-secondary)]">
+                  <span>Estimated Taxes & Statutory GST (18%)</span>
+                  <span className="font-mono text-white">{formatPrice(estimatedTaxes)}</span>
+                </div>
+                <div className="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
+                  <span>Estimated Grand Total</span>
+                  <span className="font-mono text-[var(--color-accent)]">{formatPrice(grandTotal)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* SAVE MODAL */}
+      {showSaveModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#071b3a] border border-[var(--color-accent)]/40 rounded-3xl p-6 max-w-md w-full shadow-2xl animate-fadeIn">
+            <h3 className="text-xl font-bold uppercase tracking-wider text-white mb-2">
+              Save Your Adventure
+            </h3>
+            <p className="text-xs text-[var(--text-secondary)] mb-6">
+              Save your adventure and come back to it anytime. Sign in or create an account to keep your trip across all devices.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowSaveModal(false)}
+                className="btn btn--secondary btn--sm"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveTrip}
+                className="btn btn--primary btn--sm"
+              >
+                {isSaving ? 'Saving...' : 'Confirm & Save Trip'}
+              </button>
             </div>
           </div>
         </div>
-      </section>
+      )}
+
+      {/* BOOK MODAL */}
+      {showBookModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#071b3a] border border-[var(--color-accent)]/40 rounded-3xl p-6 max-w-xl w-full shadow-2xl animate-fadeIn">
+            <h3 className="text-xl font-bold uppercase tracking-wider text-white mb-2">
+              Review Services & Proceed to Book
+            </h3>
+            <p className="text-xs text-[var(--text-secondary)] mb-6">
+              The itinerary is a personal planning document. Review each selected provider experience before securing bookings.
+            </p>
+            <div className="flex justify-between items-center">
+              <button
+                type="button"
+                onClick={() => setShowBookModal(false)}
+                className="btn btn--secondary btn--sm"
+              >
+                Return to Planner
+              </button>
+              <Link
+                href={`/booking?type=adventure&id=rafting&travelers=${trip.travelers}`}
+                className="btn btn--primary btn--sm inline-flex items-center gap-1.5"
+              >
+                Proceed to Secure Checkout <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

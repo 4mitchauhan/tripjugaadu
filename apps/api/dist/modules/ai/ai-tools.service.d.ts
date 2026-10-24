@@ -9,20 +9,6 @@ export declare class AiToolsService {
         region: string;
         state: string;
         category: string;
-        daysRecommend: string;
-        bestSeason: string;
-        heroImage: string;
-        description: string;
-        latitude: number;
-        longitude: number;
-        featured: boolean;
-    }[] | {
-        id: string;
-        slug: string;
-        name: string;
-        region: string;
-        state: string;
-        category: string;
         bestSeason: string | null;
         daysRecommend: string;
         heroImage: string;
@@ -32,6 +18,20 @@ export declare class AiToolsService {
         featured: boolean;
         createdAt: Date;
         updatedAt: Date;
+    }[] | {
+        id: string;
+        slug: string;
+        name: string;
+        region: string;
+        state: string;
+        category: string;
+        daysRecommend: string;
+        bestSeason: string;
+        heroImage: string;
+        description: string;
+        latitude: number;
+        longitude: number;
+        featured: boolean;
     }[]>;
     searchAdventures(destinationSlug?: string, difficulty?: string, maxPrice?: number): Promise<{
         id: string;

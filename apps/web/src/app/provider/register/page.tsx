@@ -38,7 +38,12 @@ export default function ProviderRegisterPage() {
       const res = await fetch('http://localhost:4000/api/v1/providers/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          ownerName: formData.contactPerson,
+          activityRegion: formData.city,
+          businessRegNo: formData.registrationNo,
+        }),
       });
       // Accept response or continue
     } catch {

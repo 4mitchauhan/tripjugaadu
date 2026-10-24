@@ -24,8 +24,8 @@ let PaymentsController = class PaymentsController {
             data: order,
         };
     }
-    async verifyPayment(orderId, paymentId, signature) {
-        const result = await this.paymentsService.verifyPayment(orderId, paymentId, signature);
+    async verifyPayment(orderId, paymentId, signature, bookingRef) {
+        const result = await this.paymentsService.verifyPayment(orderId, paymentId, signature, bookingRef);
         return {
             status: 'success',
             data: result,
@@ -52,8 +52,9 @@ __decorate([
     __param(0, Body('orderId')),
     __param(1, Body('paymentId')),
     __param(2, Body('signature')),
+    __param(3, Body('bookingRef')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], PaymentsController.prototype, "verifyPayment", null);
 __decorate([

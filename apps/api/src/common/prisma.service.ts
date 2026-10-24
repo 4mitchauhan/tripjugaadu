@@ -11,11 +11,18 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   async onModuleInit() {
+    if (process.env.NODE_ENV === 'test' || !process.env.DATABASE_URL) {
+      this.isConnected = false;
+      return;
+    }
     try {
-      await this.$connect();
+      await Promise.race([
+        this.$connect(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 2000)),
+      ]);
       this.isConnected = true;
       this.logger.log('Prisma connected to database successfully.');
-    } catch (error) {
+    } catch (_error) {
       this.isConnected = false;
       this.logger.warn('Prisma could not connect to PostgreSQL. Gracefully falling back to in-memory seed data provider.');
     }

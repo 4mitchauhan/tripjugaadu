@@ -15,12 +15,15 @@ let GeminiAiProvider = GeminiAiProvider_1 = class GeminiAiProvider {
     id = 'google-gemini-v1';
     name = 'Google Gemini Intelligence';
     logger = new Logger(GeminiAiProvider_1.name);
-    apiKey = process.env.GEMINI_API_KEY || 'AQ.Ab8RN6JOY8b3YJXaH7vzqHH64YXSJaLw0PIUJhGbOU9868Y-5g';
+    apiKey = process.env.GEMINI_API_KEY || '';
     primaryModel = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
     constructor(fallbackMock) {
         this.fallbackMock = fallbackMock;
     }
     async callGemini(prompt, systemInstruction) {
+        if (!this.apiKey) {
+            throw new Error('GEMINI_API_KEY not configured. Falling back to native deterministic model.');
+        }
         const modelsToTry = ['gemini-1.5-flash', 'gemini-2.0-flash', this.primaryModel];
         for (const model of modelsToTry) {
             try {

@@ -2,13 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service.js';
 
 interface CreateTripDto {
-  destinationId: string;
-  startDate: string;
-  endDate: string;
+  destinationId?: string;
+  startDate?: string;
+  endDate?: string;
   travelersCount?: number;
   interests?: string[];
   budgetTier?: string;
   title?: string;
+  days?: any[];
+  unscheduledItems?: any[];
+  budgetLimit?: number | null;
 }
 
 @Injectable()
@@ -60,46 +63,57 @@ export class TripsService {
 
   async createTrip(dto: CreateTripDto) {
     const tripId = `trip-${Date.now()}`;
-    const destinationCapitalized = dto.destinationId.charAt(0).toUpperCase() + dto.destinationId.slice(1);
+    const destinationId = dto.destinationId || 'rishikesh';
+    const destinationCapitalized = destinationId.charAt(0).toUpperCase() + destinationId.slice(1);
     const title = dto.title || `${destinationCapitalized} Adventure Journey`;
+
+    const days = dto.days && dto.days.length > 0
+      ? dto.days.map((d: any) => ({
+          day: d.dayNumber || d.day || 1,
+          label: d.label || `Day 0${d.dayNumber || d.day || 1}`,
+          items: Array.isArray(d.items) ? d.items : [],
+        }))
+      : [
+          {
+            day: 1,
+            label: 'Day 01',
+            items: [
+              { id: `item-${Date.now()}-1`, name: `Arrival in ${destinationCapitalized} & Hotel Check-in`, time: '12:00 PM', duration: '1 hr', status: 'confirmed', price: '₹4,500' },
+              { id: `item-${Date.now()}-2`, name: 'Local Orientation & Welcome Walk', time: '3:00 PM', duration: '2 hrs', status: 'pending', price: 'Free' },
+              { id: `item-${Date.now()}-3`, name: 'Sunset Viewpoint & Regional Dinner', time: '6:30 PM', duration: '2 hrs', status: 'pending', price: '₹800' }
+            ]
+          },
+          {
+            day: 2,
+            label: 'Day 02',
+            items: [
+              { id: `item-${Date.now()}-4`, name: 'Flagship Adventure Experience', time: '8:30 AM', duration: '4 hrs', status: 'confirmed', price: '₹3,999' },
+              { id: `item-${Date.now()}-5`, name: 'Cultural Trail & Artisan Workshop', time: '2:30 PM', duration: '3 hrs', status: 'pending', price: '₹1,200' }
+            ]
+          },
+          {
+            day: 3,
+            label: 'Day 03',
+            items: [
+              { id: `item-${Date.now()}-6`, name: 'Morning Nature Trek & Meditation', time: '7:30 AM', duration: '2.5 hrs', status: 'pending', price: 'Free' },
+              { id: `item-${Date.now()}-7`, name: 'Check-out & Onward Journey', time: '1:00 PM', duration: '1 hr', status: 'pending', price: 'Self' }
+            ]
+          }
+        ];
 
     const newTrip = {
       id: tripId,
       title,
-      destinationId: dto.destinationId,
+      destinationId,
       destinationName: destinationCapitalized,
-      startDate: dto.startDate,
-      endDate: dto.endDate,
+      startDate: dto.startDate || '2026-10-15',
+      endDate: dto.endDate || '2026-10-18',
       travelersCount: dto.travelersCount || 2,
       budgetTier: dto.budgetTier || 'EXPLORER',
-      readinessScore: 65,
-      days: [
-        {
-          day: 1,
-          label: 'Day 01',
-          items: [
-            { id: `item-${Date.now()}-1`, name: `Arrival in ${destinationCapitalized} & Hotel Check-in`, time: '12:00 PM', duration: '1 hr', status: 'confirmed', price: '₹4,500' },
-            { id: `item-${Date.now()}-2`, name: 'Local Orientation & Welcome Walk', time: '3:00 PM', duration: '2 hrs', status: 'pending', price: 'Free' },
-            { id: `item-${Date.now()}-3`, name: 'Sunset Viewpoint & Regional Dinner', time: '6:30 PM', duration: '2 hrs', status: 'pending', price: '₹800' }
-          ]
-        },
-        {
-          day: 2,
-          label: 'Day 02',
-          items: [
-            { id: `item-${Date.now()}-4`, name: 'Flagship Adventure Experience', time: '8:30 AM', duration: '4 hrs', status: 'confirmed', price: '₹3,999' },
-            { id: `item-${Date.now()}-5`, name: 'Cultural Trail & Artisan Workshop', time: '2:30 PM', duration: '3 hrs', status: 'pending', price: '₹1,200' }
-          ]
-        },
-        {
-          day: 3,
-          label: 'Day 03',
-          items: [
-            { id: `item-${Date.now()}-6`, name: 'Morning Nature Trek & Meditation', time: '7:30 AM', duration: '2.5 hrs', status: 'pending', price: 'Free' },
-            { id: `item-${Date.now()}-7`, name: 'Check-out & Onward Journey', time: '1:00 PM', duration: '1 hr', status: 'pending', price: 'Self' }
-          ]
-        }
-      ]
+      budgetLimit: dto.budgetLimit || null,
+      unscheduledItems: dto.unscheduledItems || [],
+      readinessScore: 85,
+      days,
     };
 
     this.inMemoryTrips.unshift(newTrip);

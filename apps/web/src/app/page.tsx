@@ -84,12 +84,9 @@ export default function Home() {
           <p className="hero__eyebrow">TripJugaadu Presents</p>
           <h1 className="hero__title">Your Next<br/>Adventure<br/>Starts Here</h1>
           <p className="hero__subtitle">Discover places. Prepare better. Build your journey. Travel smarter across India.</p>
-          <div className="hero__actions">
+          <div className="hero__actions flex justify-center items-center">
             <Link href="/explore" className="btn btn--primary btn--lg">
               Explore India <span className="btn-arrow">→</span>
-            </Link>
-            <Link href="/trip-builder" className="btn btn--secondary btn--lg">
-              Build My Trip
             </Link>
           </div>
         </div>
@@ -237,17 +234,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* TRIP BUILDER CTA */}
-      <section className="section" style={{ background: 'linear-gradient(135deg, var(--bg-secondary), var(--bg-deep))', textAlign: 'center' }}>
-        <div className="container reveal">
-          <h2 className="section__title" style={{ margin: '0 auto var(--space-4)' }}>Build Your Journey</h2>
-          <p className="section__subtitle" style={{ margin: '0 auto var(--space-6)' }}>You bring the idea. We build the journey. Create a personalized trip in minutes.</p>
-          <Link href="/trip-builder" className="btn btn--primary btn--lg">
-            Start Building <span className="btn-arrow">→</span>
-          </Link>
         </div>
       </section>
     </>

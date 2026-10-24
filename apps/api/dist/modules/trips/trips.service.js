@@ -58,19 +58,16 @@ let TripsService = class TripsService {
     }
     async createTrip(dto) {
         const tripId = `trip-${Date.now()}`;
-        const destinationCapitalized = dto.destinationId.charAt(0).toUpperCase() + dto.destinationId.slice(1);
+        const destinationId = dto.destinationId || 'rishikesh';
+        const destinationCapitalized = destinationId.charAt(0).toUpperCase() + destinationId.slice(1);
         const title = dto.title || `${destinationCapitalized} Adventure Journey`;
-        const newTrip = {
-            id: tripId,
-            title,
-            destinationId: dto.destinationId,
-            destinationName: destinationCapitalized,
-            startDate: dto.startDate,
-            endDate: dto.endDate,
-            travelersCount: dto.travelersCount || 2,
-            budgetTier: dto.budgetTier || 'EXPLORER',
-            readinessScore: 65,
-            days: [
+        const days = dto.days && dto.days.length > 0
+            ? dto.days.map((d) => ({
+                day: d.dayNumber || d.day || 1,
+                label: d.label || `Day 0${d.dayNumber || d.day || 1}`,
+                items: Array.isArray(d.items) ? d.items : [],
+            }))
+            : [
                 {
                     day: 1,
                     label: 'Day 01',
@@ -96,7 +93,20 @@ let TripsService = class TripsService {
                         { id: `item-${Date.now()}-7`, name: 'Check-out & Onward Journey', time: '1:00 PM', duration: '1 hr', status: 'pending', price: 'Self' }
                     ]
                 }
-            ]
+            ];
+        const newTrip = {
+            id: tripId,
+            title,
+            destinationId,
+            destinationName: destinationCapitalized,
+            startDate: dto.startDate || '2026-10-15',
+            endDate: dto.endDate || '2026-10-18',
+            travelersCount: dto.travelersCount || 2,
+            budgetTier: dto.budgetTier || 'EXPLORER',
+            budgetLimit: dto.budgetLimit || null,
+            unscheduledItems: dto.unscheduledItems || [],
+            readinessScore: 85,
+            days,
         };
         this.inMemoryTrips.unshift(newTrip);
         return newTrip;

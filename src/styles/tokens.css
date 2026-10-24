@@ -1,0 +1,152 @@
+/* ============================================================
+   TRIPJUGAADU — DESIGN TOKENS
+   70% Reference Visual DNA + 30% Product DNA
+   ============================================================ */
+
+:root {
+  /* ── COLOR SYSTEM ── */
+
+  /* Backgrounds */
+  --bg-primary: #010611;
+  --bg-secondary: #071B3A;
+  --bg-deep: #0A346A;
+  --bg-mid: #215A98;
+  --bg-surface: rgba(7, 27, 58, 0.6);
+  --bg-glass: rgba(7, 27, 58, 0.58);
+  --bg-card: rgba(7, 27, 58, 0.48);
+  --surface-base: var(--bg-primary);
+  --surface-elevated: rgba(7, 27, 58, 0.72);
+  --surface-glass: rgba(1, 6, 17, 0.72);
+  --surface-glass-strong: rgba(1, 6, 17, 0.86);
+
+  /* Accent */
+  --color-accent: #00AEEF;
+  --color-accent-hover: #33c1f3;
+  --color-accent-dim: rgba(0, 174, 239, 0.15);
+  --color-accent-glow: rgba(0, 174, 239, 0.3);
+  --color-bright-blue: #4088C7;
+
+  /* Text */
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-accent: #00AEEF;
+  --foreground-primary: var(--text-primary);
+  --foreground-secondary: var(--text-secondary);
+  --foreground-muted: var(--text-muted);
+  --foreground-accent: var(--color-accent);
+  --foreground-accent-high-contrast: #38BDF8;
+  --foreground-on-image: #FFFFFF;
+  --foreground-on-dark: #F8FAFC;
+  --foreground-on-light: #010611;
+  --foreground-inverse: #010611;
+
+  /* Borders */
+  --border-color: rgba(255, 255, 255, 0.12);
+  --border-hover: rgba(255, 255, 255, 0.30);
+  --border-active: rgba(0, 174, 239, 0.6);
+  --border-strong: rgba(255, 255, 255, 0.40);
+  --image-overlay: rgba(1, 6, 17, 0.50);
+  --image-overlay-strong: rgba(1, 6, 17, 0.82);
+  --image-text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.95);
+  --image-text-shadow-soft: 0 2px 10px rgba(0, 0, 0, 0.85);
+  --hero-title-shadow: 0 2px 4px rgba(0, 0, 0, 0.95), 0 6px 20px rgba(0, 0, 0, 0.9), 0 14px 44px rgba(1, 6, 17, 0.95);
+  --hero-text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 3px 12px rgba(0, 0, 0, 0.85);
+
+  /* Travel Accents (used sparingly) */
+  --accent-warm: #F59E0B;
+  --accent-green: #14B8A6;
+  --accent-violet: #8B5CF6;
+  --accent-red: #EF4444;
+
+  /* Status */
+  --status-success: #14B8A6;
+  --status-pending: #F59E0B;
+  --status-error: #EF4444;
+
+  /* ── TYPOGRAPHY ── */
+
+  --font-display: 'Bebas Neue', 'Impact', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Display Scale (Bebas Neue) */
+  --display-hero: clamp(3.5rem, 8vw, 7rem);
+  --display-xl: clamp(2.8rem, 6vw, 6rem);
+  --display-lg: clamp(2.2rem, 5vw, 4.5rem);
+  --display-md: clamp(1.8rem, 4vw, 3rem);
+  --display-sm: clamp(1.5rem, 3vw, 2rem);
+
+  /* Body Scale (Inter) */
+  --text-xl: 1.25rem;
+  --text-lg: 1.125rem;
+  --text-base: 1rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+  --text-micro: 0.625rem;
+
+  /* Line Heights */
+  --leading-tight: 0.9;
+  --leading-snug: 1.1;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  /* Letter Spacing */
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.08em;
+  --tracking-widest: 0.12em;
+
+  /* ── SPACING ── */
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-10: 8rem;
+  --space-section: clamp(4rem, 10vh, 8rem);
+
+  /* ── BORDER RADIUS ── */
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  /* ── SHADOWS ── */
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 24px rgba(0, 174, 239, 0.25);
+  --shadow-glow-strong: 0 0 40px rgba(0, 174, 239, 0.4);
+
+  /* ── TRANSITIONS ── */
+
+  --transition-fast: 150ms ease;
+  --transition-base: 300ms ease;
+  --transition-slow: 500ms ease;
+  --transition-cinematic: 800ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── LAYOUT ── */
+
+  --container-max: 1400px;
+  --container-narrow: 960px;
+  --nav-height: 72px;
+  --nav-height-compact: 56px;
+
+  /* ── Z-INDEX ── */
+
+  --z-base: 1;
+  --z-card: 10;
+  --z-sticky: 100;
+  --z-nav: 1000;
+  --z-overlay: 2000;
+  --z-modal: 3000;
+}

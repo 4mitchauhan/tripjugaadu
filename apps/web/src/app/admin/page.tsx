@@ -111,40 +111,91 @@ export default function AdminConsolePage() {
   const [partnerWebhooks, setPartnerWebhooks] = useState<any[]>([]);
 
   useEffect(() => {
-    // Load financial summary & ledger
-    fetch('http://localhost:4000/api/v1/finance/summary')
-      .then(res => res.json())
-      .then(d => { if (d.status === 'success') setFinancialSummary(d.data); })
-      .catch(() => {});
+    const handleHash = () => {
+      if (typeof window === 'undefined') return;
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#finance' || hash === '#ledger') {
+        setActiveTab('finance');
+      } else if (hash === '#observability' || hash === '#health' || hash === '#metrics') {
+        setActiveTab('observability');
+      } else if (hash === '#partners' || hash === '#webhooks') {
+        setActiveTab('partners');
+      } else if (hash === '#payments') {
+        setActiveTab('payments');
+      } else if (hash === '#audit') {
+        setActiveTab('audit');
+      } else if (hash === '#listings') {
+        setActiveTab('listings');
+      } else if (hash === '#providers') {
+        setActiveTab('providers');
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
-    fetch('http://localhost:4000/api/v1/finance/ledger?limit=10')
-      .then(res => res.json())
-      .then(d => { if (d.status === 'success') setLedgerEntries(d.data); })
-      .catch(() => {});
+  useEffect(() => {
+    async function initAdminConsole() {
+      let token = typeof window !== 'undefined' ? (sessionStorage.getItem('tj_token') || localStorage.getItem('tj_token')) : null;
 
-    fetch('http://localhost:4000/api/v1/finance/payouts')
-      .then(res => res.json())
-      .then(d => { if (d.status === 'success') setPayouts(d.data); })
-      .catch(() => {});
+      if (!token) {
+        // Authenticate admin session in background if no token exists
+        try {
+          const authRes = await fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: 'admin@tripjugaadu.com', password: 'adminpass123' }),
+          });
+          if (authRes.ok) {
+            const authData = await authRes.json();
+            token = authData?.data?.token;
+            if (typeof window !== 'undefined' && token) {
+              sessionStorage.setItem('tj_token', token);
+            }
+          }
+        } catch {}
+      }
 
-    // Load observability health & metrics
-    fetch('http://localhost:4000/api/v1/health')
-      .then(res => res.json())
-      .then(d => setHealthData(d))
-      .catch(() => {});
+      const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-    fetch('http://localhost:4000/api/v1/metrics')
-      .then(res => res.json())
-      .then(d => { if (d.status === 'success') setMetricsData(d.data); })
-      .catch(() => {});
+      // Load financial summary & ledger
+      fetch('/api/v1/finance/summary', { headers })
+        .then(res => res.json())
+        .then(d => { if (d.status === 'success') setFinancialSummary(d.data); })
+        .catch(() => {});
 
-    // Load partner webhooks
-    fetch('http://localhost:4000/api/v1/partner/webhooks', {
-      headers: { 'x-partner-key': 'tj_live_ghuk_984128471204' }
-    })
-      .then(res => res.json())
-      .then(d => { if (d.status === 'success') setPartnerWebhooks(d.data); })
-      .catch(() => {});
+      fetch('/api/v1/finance/ledger?limit=10', { headers })
+        .then(res => res.json())
+        .then(d => { if (d.status === 'success') setLedgerEntries(d.data); })
+        .catch(() => {});
+
+      fetch('/api/v1/finance/payouts', { headers })
+        .then(res => res.json())
+        .then(d => { if (d.status === 'success') setPayouts(d.data); })
+        .catch(() => {});
+
+      // Load observability health & metrics
+      fetch('/api/v1/health')
+        .then(res => res.json())
+        .then(d => setHealthData(d))
+        .catch(() => {});
+
+      fetch('/api/v1/metrics')
+        .then(res => res.json())
+        .then(d => { if (d.status === 'success') setMetricsData(d.data); })
+        .catch(() => {});
+
+      // Load partner webhooks
+      fetch('/api/v1/partner/webhooks', {
+        headers: { 'x-partner-key': 'tj_live_ghuk_984128471204' }
+      })
+        .then(res => res.json())
+        .then(d => { if (d.status === 'success') setPartnerWebhooks(d.data); })
+        .catch(() => {});
+    }
+
+    initAdminConsole();
   }, []);
 
   const handleApproveProvider = (id: string, name: string) => {
@@ -178,8 +229,12 @@ export default function AdminConsolePage() {
   const handleSettlePayout = async (payoutId: string) => {
     setIsSettling(payoutId);
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/finance/payouts/${payoutId}/settle`, {
+      const token = typeof window !== 'undefined' ? (sessionStorage.getItem('tj_token') || localStorage.getItem('tj_token')) : null;
+      const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+      const res = await fetch(`/api/v1/finance/payouts/${payoutId}/settle`, {
         method: 'POST',
+        headers,
       });
       if (res.ok) {
         const json = await res.json();

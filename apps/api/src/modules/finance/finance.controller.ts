@@ -1,11 +1,16 @@
-import { Controller, Get, Post, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Param, Query, UseGuards } from '@nestjs/common';
 import { FinanceService } from './finance.service.js';
+import { AuthGuard } from '../../common/guards/auth.guard.js';
+import { RolesGuard } from '../../common/guards/roles.guard.js';
+import { Roles } from '../../common/guards/roles.decorator.js';
 
 @Controller('finance')
 export class FinanceController {
   constructor(private readonly financeService: FinanceService) {}
 
   @Get('summary')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   getFinancialSummary() {
     return {
       status: 'success',
@@ -15,6 +20,8 @@ export class FinanceController {
   }
 
   @Get('ledger')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   getLedger(@Query('limit') limit: string) {
     const numLimit = parseInt(limit || '50', 10);
     return {
@@ -33,6 +40,8 @@ export class FinanceController {
   }
 
   @Get('payouts')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   getPayouts() {
     return {
       status: 'success',
@@ -41,6 +50,8 @@ export class FinanceController {
   }
 
   @Post('payouts/:id/settle')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   settlePayout(@Param('id') id: string) {
     const settled = this.financeService.settlePayout(id);
     return {

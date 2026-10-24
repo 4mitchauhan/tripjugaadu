@@ -14,14 +14,26 @@ export declare class PaymentsController {
             createdAt: string;
         };
     }>;
-    verifyPayment(orderId: string, paymentId: string, signature: string): Promise<{
+    verifyPayment(orderId: string, paymentId: string, signature: string, bookingRef?: string): Promise<{
         status: string;
         data: {
             success: boolean;
             orderId: string;
             paymentId: string;
+            bookingRef: string;
             status: string;
+            alreadyProcessed: boolean;
+            bookingStatus?: undefined;
+            verifiedAt?: undefined;
+        } | {
+            success: boolean;
+            orderId: string;
+            paymentId: string;
+            bookingRef: string;
+            status: string;
+            bookingStatus: string;
             verifiedAt: string;
+            alreadyProcessed?: undefined;
         };
     }>;
     handleWebhook(payload: any, signature?: string): Promise<{

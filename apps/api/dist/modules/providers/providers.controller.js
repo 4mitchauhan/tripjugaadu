@@ -10,8 +10,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, UseGuards } from '@nestjs/common';
 import { ProvidersService, ProviderRegistrationDto, CreateListingDto } from './providers.service.js';
+import { AuthGuard } from '../../common/guards/auth.guard.js';
+import { RolesGuard } from '../../common/guards/roles.guard.js';
+import { Roles } from '../../common/guards/roles.decorator.js';
 let ProvidersController = class ProvidersController {
     providersService;
     constructor(providersService) {
@@ -74,18 +77,24 @@ __decorate([
 ], ProvidersController.prototype, "register", null);
 __decorate([
     Get('dashboard'),
+    UseGuards(AuthGuard, RolesGuard),
+    Roles('PROVIDER', 'ADMIN'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ProvidersController.prototype, "getDashboardSummary", null);
 __decorate([
     Get('listings'),
+    UseGuards(AuthGuard, RolesGuard),
+    Roles('PROVIDER', 'ADMIN'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ProvidersController.prototype, "getListings", null);
 __decorate([
     Post('listings'),
+    UseGuards(AuthGuard, RolesGuard),
+    Roles('PROVIDER', 'ADMIN'),
     __param(0, Body()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [CreateListingDto]),
@@ -93,12 +102,16 @@ __decorate([
 ], ProvidersController.prototype, "createListing", null);
 __decorate([
     Get('bookings'),
+    UseGuards(AuthGuard, RolesGuard),
+    Roles('PROVIDER', 'ADMIN'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ProvidersController.prototype, "getBookings", null);
 __decorate([
     Patch('bookings/:id/checkin'),
+    UseGuards(AuthGuard, RolesGuard),
+    Roles('PROVIDER', 'ADMIN'),
     __param(0, Param('id')),
     __param(1, Body('checkedIn')),
     __metadata("design:type", Function),

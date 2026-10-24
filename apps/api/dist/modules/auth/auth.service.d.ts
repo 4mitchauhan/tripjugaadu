@@ -1,6 +1,18 @@
 import { PrismaService } from '../../common/prisma.service.js';
+export interface UserRecord {
+    id: string;
+    email: string;
+    passwordHash: string;
+    firstName: string;
+    lastName: string;
+    role: 'USER' | 'PROVIDER' | 'ADMIN';
+    avatarUrl: string | null;
+    isVerified: boolean;
+    createdAt: string;
+}
 export declare class AuthService {
     private readonly prisma;
+    private readonly logger;
     private inMemoryUsers;
     constructor(prisma: PrismaService);
     register(body: {
@@ -9,6 +21,7 @@ export declare class AuthService {
         fullName?: string;
         firstName?: string;
         lastName?: string;
+        role?: 'USER' | 'PROVIDER';
     }): Promise<{
         token: string;
         user: {
@@ -16,8 +29,10 @@ export declare class AuthService {
             email: string;
             firstName: string;
             lastName: string;
-            role: string;
+            role: "USER" | "PROVIDER" | "ADMIN";
+            avatarUrl: string | null;
             isVerified: boolean;
+            createdAt: string;
         };
     }>;
     login(body: {
@@ -26,15 +41,27 @@ export declare class AuthService {
     }): Promise<{
         token: string;
         user: {
-            id: any;
-            email: any;
-            firstName: any;
-            lastName: any;
-            role: any;
-            isVerified: any;
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+            role: "USER" | "PROVIDER" | "ADMIN";
+            avatarUrl: string | null;
+            isVerified: boolean;
+            createdAt: string;
         };
     }>;
-    getMe(token?: string): Promise<{
-        user: any;
+    getMe(authHeader?: string): Promise<{
+        user: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+            role: "USER" | "PROVIDER" | "ADMIN";
+            avatarUrl: string | null;
+            isVerified: boolean;
+            createdAt: string;
+        };
     }>;
+    private sanitizeUser;
 }

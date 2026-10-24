@@ -8,10 +8,12 @@ import { Module } from '@nestjs/common';
 import { BookingsController } from './bookings.controller.js';
 import { BookingsService } from './bookings.service.js';
 import { PrismaService } from '../../common/prisma.service.js';
+import { CouponsModule } from '../coupons/coupons.module.js';
 let BookingsModule = class BookingsModule {
 };
 BookingsModule = __decorate([
     Module({
+        imports: [CouponsModule],
         controllers: [BookingsController],
         providers: [BookingsService, PrismaService],
         exports: [BookingsService],

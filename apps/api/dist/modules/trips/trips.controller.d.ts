@@ -14,18 +14,13 @@ export declare class TripsController {
             endDate: string;
             travelersCount: number;
             budgetTier: string;
+            budgetLimit: number | null;
+            unscheduledItems: any[];
             readinessScore: number;
             days: {
-                day: number;
-                label: string;
-                items: {
-                    id: string;
-                    name: string;
-                    time: string;
-                    duration: string;
-                    status: string;
-                    price: string;
-                }[];
+                day: any;
+                label: any;
+                items: any;
             }[];
         };
     }>;

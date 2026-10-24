@@ -12,8 +12,10 @@ export declare class AuthController {
                 email: string;
                 firstName: string;
                 lastName: string;
-                role: string;
+                role: "USER" | "PROVIDER" | "ADMIN";
+                avatarUrl: string | null;
                 isVerified: boolean;
+                createdAt: string;
             };
         };
     }>;
@@ -23,19 +25,30 @@ export declare class AuthController {
         data: {
             token: string;
             user: {
-                id: any;
-                email: any;
-                firstName: any;
-                lastName: any;
-                role: any;
-                isVerified: any;
+                id: string;
+                email: string;
+                firstName: string;
+                lastName: string;
+                role: "USER" | "PROVIDER" | "ADMIN";
+                avatarUrl: string | null;
+                isVerified: boolean;
+                createdAt: string;
             };
         };
     }>;
     getMe(authHeader?: string): Promise<{
         status: string;
         data: {
-            user: any;
+            user: {
+                id: string;
+                email: string;
+                firstName: string;
+                lastName: string;
+                role: "USER" | "PROVIDER" | "ADMIN";
+                avatarUrl: string | null;
+                isVerified: boolean;
+                createdAt: string;
+            };
         };
     }>;
 }
