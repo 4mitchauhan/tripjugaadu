@@ -2,7 +2,7 @@
 
 > **India's Autonomous High-Altitude Adventure & Experiential Travel Ecosystem**
 
-[![Next.js](https://img.shields.io/badge/Next.js-16.4.0-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.4.3-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.3.0-blue?style=for-the-badge&logo=react)](https://react.dev/)
 [![NestJS](https://img.shields.io/badge/NestJS-12.0.1-red?style=for-the-badge&logo=nestjs)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x%20%7C%206.x-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
@@ -558,7 +558,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 | Layer | Technology |
 | :--- | :--- |
-| **Frontend Framework** | Next.js 16.4.0 (Turbopack, App Router, React Server Components) |
+| **Frontend Framework** | Next.js 16.4.3 (Turbopack, App Router, React Server Components) |
 | **UI Library** | React 19.3.0 |
 | **Language** | TypeScript 5.x / 6.x |
 | **Styling** | Vanilla CSS Design System with CSS Tokens & Tailwind CSS |
