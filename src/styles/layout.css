@@ -69,10 +69,10 @@
   inset: 0;
   background:
     linear-gradient(to bottom,
-      rgba(1, 6, 17, 0.72) 0%,
-      rgba(1, 6, 17, 0.25) 25%,
-      rgba(1, 6, 17, 0.35) 60%,
-      rgba(1, 6, 17, 0.94) 100%
+      rgba(1, 6, 17, 0.45) 0%,
+      rgba(1, 6, 17, 0.15) 25%,
+      rgba(1, 6, 17, 0.25) 60%,
+      rgba(1, 6, 17, 0.88) 100%
     );
   z-index: 1;
   pointer-events: none;
@@ -83,9 +83,9 @@
   inset: 0;
   background: radial-gradient(
     ellipse 75% 65% at 50% 48%,
-    rgba(1, 6, 17, 0.65) 0%,
-    rgba(1, 6, 17, 0.35) 48%,
-    rgba(1, 6, 17, 0.08) 72%,
+    rgba(1, 6, 17, 0.45) 0%,
+    rgba(1, 6, 17, 0.20) 48%,
+    rgba(1, 6, 17, 0.05) 72%,
     transparent 100%
   );
   z-index: 1;

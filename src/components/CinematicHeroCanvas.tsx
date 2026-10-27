@@ -3,11 +3,11 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 const TOTAL_FRAMES = 150;
-const LERP_FACTOR = 0.14;
-const INITIAL_PRIORITY_FRAMES = 12;
-const MAX_CACHED_FRAMES = 35;
-const NEARBY_WINDOW = 6;
-const KEYFRAME_STRIDE = 10;
+const LERP_FACTOR = 0.18;
+const INITIAL_PRIORITY_FRAMES = 15;
+const MAX_CACHED_FRAMES = 150;
+const NEARBY_WINDOW = 10;
+const KEYFRAME_STRIDE = 5;
 
 export default function CinematicHeroCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -158,37 +158,21 @@ export default function CinematicHeroCanvas() {
       Math.min(TOTAL_FRAMES - 1, Math.round(progress * (TOTAL_FRAMES - 1))),
     );
 
-    // Fluid hero text & search panel fadeout:
-    // Fades smoothly over the first 25% of scroll distance giving instant visual feedback
+    // Keep UI completely visible and interactive in front of the background animation
     const heroContent = container.querySelector<HTMLElement>('.hero__content');
-    const heroSearch = container.querySelector<HTMLElement>('.hero__search');
-    const readabilityLayer = container.querySelector<HTMLElement>('.hero__readability-layer');
-
-    const fadeFactor = Math.min(1, progress * 4.0);
-    const contentOpacity = Math.max(0, 1 - fadeFactor);
-    const contentTranslateY = fadeFactor * -50;
-    const searchTranslateY = fadeFactor * 30;
+    const searchElements = container.querySelectorAll<HTMLElement>('.hero__search, .search-panel');
 
     if (heroContent) {
-      heroContent.style.opacity = contentOpacity.toFixed(3);
-      heroContent.style.transform = `translate3d(0, ${contentTranslateY.toFixed(1)}px, 0)`;
-      heroContent.style.pointerEvents = contentOpacity < 0.05 ? 'none' : 'auto';
-      heroContent.style.transition = 'opacity 0.08s ease-out, transform 0.08s ease-out';
+      heroContent.style.opacity = '1';
+      heroContent.style.transform = 'none';
+      heroContent.style.pointerEvents = 'auto';
     }
 
-    const searchElements = container.querySelectorAll<HTMLElement>('.hero__search, .search-panel');
     searchElements.forEach((el) => {
-      el.style.opacity = contentOpacity.toFixed(3);
-      el.style.transform = `translate3d(0, ${searchTranslateY.toFixed(1)}px, 0)`;
-      el.style.pointerEvents = contentOpacity < 0.05 ? 'none' : 'auto';
-      el.style.transition = 'opacity 0.08s ease-out, transform 0.08s ease-out';
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+      el.style.pointerEvents = 'auto';
     });
-
-    if (readabilityLayer) {
-      const vignetteOpacity = Math.max(0, 1 - progress * 2.5);
-      readabilityLayer.style.opacity = vignetteOpacity.toFixed(3);
-      readabilityLayer.style.transition = 'opacity 0.1s ease-out';
-    }
   }, []);
 
   const loadFrame = useCallback((index: number): Promise<HTMLImageElement | null> => {
