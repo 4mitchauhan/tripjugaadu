@@ -264,7 +264,7 @@ const UNIFIED_CATALOG: CatalogItem[] = [
 function ExploreContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { toggleFavorite, isFavorite, addToTrip } = useTrip();
+  const { toggleFavorite, isFavorite, addToTrip, isInTrip } = useTrip();
 
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState(searchParams?.get('q') || '');
@@ -338,6 +338,24 @@ function ExploreContent() {
     if (catalogEl) {
       catalogEl.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  const handleAddPlaceToTrip = (place: WallPlace) => {
+    addToTrip({
+      id: `place-${place.id}`,
+      name: `${place.name} Exploration`,
+      location: place.name,
+      price: 'Included',
+      numericPrice: 0,
+      image: place.image,
+      duration: place.duration,
+      type: 'adventure',
+      category: 'Destination Blueprint',
+      rating: place.rating,
+      reviews: place.reviews,
+    }, 'adventure');
+    setAddedItemFeedback(`${place.name} Expedition`);
+    setTimeout(() => setAddedItemFeedback(null), 3000);
   };
 
   const handleAddTrip = (item: CatalogItem) => {
@@ -568,14 +586,32 @@ function ExploreContent() {
                           <span>Explore Place</span>
                           <ArrowRight size={13} strokeWidth={2} />
                         </Link>
-                        <button
-                          type="button"
-                          onClick={() => handleFilterByPlace(place.name)}
-                          className="text-xs text-[var(--text-muted)] hover:text-[var(--color-accent)] font-semibold transition-colors flex items-center gap-1"
-                        >
-                          <span>Filter Expeditions</span>
-                          <ChevronRight size={12} />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleAddPlaceToTrip(place);
+                            }}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                              isInTrip(`place-${place.id}`)
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                                : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500 hover:text-black'
+                            }`}
+                          >
+                            <Plus size={12} />
+                            <span>{isInTrip(`place-${place.id}`) ? 'In Trip ✓' : '+ Add to Trip Plan'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleFilterByPlace(place.name)}
+                            className="text-xs text-[var(--text-muted)] hover:text-[var(--color-accent)] font-semibold transition-colors flex items-center gap-1 p-1"
+                            title="Filter expeditions in this place"
+                          >
+                            <ChevronRight size={14} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

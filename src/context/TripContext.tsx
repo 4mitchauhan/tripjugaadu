@@ -77,20 +77,39 @@ function parsePriceToNumber(priceStr: string | undefined): number {
   return cleaned ? parseInt(cleaned, 10) : 0;
 }
 
+export function getCanonicalCity(locationStr?: string): string {
+  if (!locationStr) return 'General India';
+  const loc = locationStr.toLowerCase();
+  if (loc.includes('rishi') || loc.includes('shivpuri') || loc.includes('ganga') || loc.includes('mohan chatti') || loc.includes('tapovan')) return 'Rishikesh';
+  if (loc.includes('manali') || loc.includes('solang') || loc.includes('rohtang') || loc.includes('kullu')) return 'Manali';
+  if (loc.includes('ladakh') || loc.includes('leh') || loc.includes('nubra') || loc.includes('pangong') || loc.includes('zanskar') || loc.includes('chadar') || loc.includes('markha')) return 'Ladakh';
+  if (loc.includes('kasol') || loc.includes('parvati') || loc.includes('kheerganga') || loc.includes('tosh') || loc.includes('chalal')) return 'Kasol';
+  if (loc.includes('goa') || loc.includes('palolem') || loc.includes('anjuna') || loc.includes('panaji') || loc.includes('calangute')) return 'Goa';
+  if (loc.includes('mussoorie') || loc.includes('landour') || loc.includes('dhanaulti')) return 'Mussoorie';
+  if (loc.includes('bir') || loc.includes('billing')) return 'Bir Billing';
+  if (loc.includes('spiti') || loc.includes('kaza') || loc.includes('chandra taal')) return 'Spiti Valley';
+  if (loc.includes('meghalaya') || loc.includes('shillong') || loc.includes('cherrapunji') || loc.includes('dawki')) return 'Meghalaya';
+  if (loc.includes('uttarakhand')) return 'Rishikesh';
+  if (loc.includes('himachal')) return 'Manali';
+  return locationStr.split(',')[0].trim();
+}
+
 function normalizeToTripItem(raw: any, type: 'adventure' | 'stay' | 'experience' = 'adventure'): TripItem {
+  const loc = raw.location || raw.region || raw.name || 'India';
+  const price = raw.price || (raw.numericPrice ? `₹${raw.numericPrice.toLocaleString('en-IN')}` : 'Included in Plan');
   return {
     id: raw.id,
     name: raw.name || raw.title || 'Adventure Experience',
-    location: raw.location || raw.region || 'India',
-    price: raw.price || 'Price to be confirmed',
-    numericPrice: parsePriceToNumber(raw.price),
+    location: loc,
+    price: price,
+    numericPrice: raw.numericPrice || parsePriceToNumber(raw.price),
     image: raw.image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
-    duration: raw.duration || (type === 'stay' ? 'Overnight' : '2–3 Hours'),
+    duration: raw.duration || raw.days || (type === 'stay' ? 'Overnight' : '2–3 Hours'),
     type,
     category: raw.category || raw.difficulty || (type === 'stay' ? 'Lodging' : 'Outdoor'),
     difficulty: raw.difficulty,
-    rating: raw.rating || '4.8',
-    reviewCount: raw.reviewCount || 42,
+    rating: typeof raw.rating === 'number' ? raw.rating.toFixed(1) : (raw.rating || '4.8'),
+    reviewCount: raw.reviewCount || raw.reviews || 42,
     reviewHighlight: raw.reviewHighlight || 'Verified explorer favorite with top safety ratings.',
     bookingStatus: 'in_trip',
     timeSlot: 'Morning Slot (09:00 AM)',
@@ -230,8 +249,9 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       unscheduledItems: [...prev.unscheduledItems, normalized],
     }));
 
-    showToast(`Added "${normalized.name}" to your trip!`);
-    return { success: true, message: `Added "${normalized.name}" to your trip.` };
+    const city = getCanonicalCity(normalized.location);
+    showToast(`Added "${normalized.name}" to your ${city} plan!`);
+    return { success: true, message: `Added "${normalized.name}" to your ${city} plan.` };
   }, [isInTrip, showToast]);
 
   // Remove an experience from the trip completely
