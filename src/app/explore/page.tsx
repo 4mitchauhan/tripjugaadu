@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { DESTINATIONS, ADVENTURES, STAYS, EXPERIENCES } from '@/lib/data';
@@ -9,12 +9,10 @@ import {
   Compass,
   MapPin,
   MountainSnow,
-  Hotel,
   Sparkles,
   ArrowRight,
   Search,
   Star,
-  SlidersHorizontal,
   Heart,
   X,
   RotateCcw,
@@ -23,13 +21,11 @@ import {
   TreePine,
   Tent,
   Wind,
-  Landmark,
-  Coffee,
-  Sparkle,
   Plus,
   Check,
   ChevronRight,
-  Sliders
+  SlidersHorizontal,
+  Navigation as NavIcon
 } from 'lucide-react';
 
 export interface CatalogItem {
@@ -41,7 +37,6 @@ export interface CatalogItem {
   category: string;
   difficulty?: string;
   duration: string;
-  durationTier: 'day' | 'short' | 'multi' | 'week';
   price: string;
   numericPrice: number;
   rating: number;
@@ -50,47 +45,168 @@ export interface CatalogItem {
   description: string;
   href: string;
   tags: string[];
-  isFeatured?: boolean;
 }
 
-// Build authoritative unified catalog from existing real data
-const UNIFIED_CATALOG: CatalogItem[] = [
-  ...DESTINATIONS.map((d): CatalogItem => ({
-    id: d.id,
-    name: d.name,
-    location: d.name,
-    region: d.region,
-    type: 'Destination',
-    category: d.category,
-    duration: d.days,
-    durationTier: d.days.includes('07') ? 'week' : d.days.includes('04') ? 'multi' : 'short',
-    price: 'Explore',
-    numericPrice: 0,
+export interface WallPlace {
+  id: string;
+  name: string;
+  region: string;
+  vibe: 'Himalayan' | 'Valleys' | 'Coastal' | 'Hidden';
+  duration: string;
+  rating: number;
+  reviews: number;
+  rank: string;
+  image: string;
+  description: string;
+  highlights: string[];
+  href: string;
+}
+
+// ── THE WALL OF MUST-EXPLORE PLACES (9 Iconic Subcontinent Wonders) ──
+const MUST_EXPLORE_PLACES: WallPlace[] = [
+  {
+    id: 'rishikesh',
+    name: 'Rishikesh',
+    region: 'Uttarakhand',
+    vibe: 'Valleys',
+    duration: '03 Days / 02 Nights',
     rating: 4.9,
-    reviews: d.id === 'rishikesh' ? 184 : d.id === 'ladakh' ? 210 : 142,
-    image: d.image,
-    description: d.description,
-    href: `/destination/${d.id}`,
-    tags: [d.name, d.region, 'Destination', ...(d.category.split(' / '))],
-    isFeatured: d.id === 'rishikesh' || d.id === 'ladakh',
-  })),
+    reviews: 184,
+    rank: '#01 MUST EXPLORE',
+    image: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=800&q=80',
+    description: 'The adventure capital of India, nestled along the turquoise Ganges with white-water rapids and cliffside bungee jumps.',
+    highlights: ['🌊 Grade IV Rapids', '🪂 83m Fixed Bungee', '🧘 Sunset Ganga Aarti'],
+    href: '/destination/rishikesh',
+  },
+  {
+    id: 'ladakh',
+    name: 'Ladakh',
+    region: 'Jammu & Kashmir / Ladakh',
+    vibe: 'Himalayan',
+    duration: '07 Days / 06 Nights',
+    rating: 5.0,
+    reviews: 210,
+    rank: '#02 MUST EXPLORE',
+    image: 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800&q=80',
+    description: 'The raw rooftop of the world — high alpine mountain passes, starlit galactic skies, and crystalline glacial lakes.',
+    highlights: ['🏔️ Khardung La 18,380ft', '🌌 Starlit Milky Way', '🧊 Pangong Tso Lake'],
+    href: '/destination/ladakh',
+  },
+  {
+    id: 'manali',
+    name: 'Manali',
+    region: 'Himachal Pradesh',
+    vibe: 'Himalayan',
+    duration: '04 Days / 03 Nights',
+    rating: 4.8,
+    reviews: 160,
+    rank: '#03 MUST EXPLORE',
+    image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&q=80',
+    description: 'Pine-scented alpine valleys, high-altitude Rohtang passes, and raging river runs beneath jagged snow peaks.',
+    highlights: ['🌲 Solang Pine Valley', '⛷️ Rohtang Snow Passes', '🎒 Beas River Trails'],
+    href: '/destination/manali',
+  },
+  {
+    id: 'kasol',
+    name: 'Kasol & Parvati',
+    region: 'Himachal Pradesh',
+    vibe: 'Valleys',
+    duration: '03 Days / 02 Nights',
+    rating: 4.9,
+    reviews: 135,
+    rank: '#04 MUST EXPLORE',
+    image: 'https://images.unsplash.com/photo-1494783367193-149034c05e8f?w=800&q=80',
+    description: 'A mythic valley of mist, hot sulfur springs, pine forests, and transcendent mountain trails leading to Kheerganga.',
+    highlights: ['♨️ Kheerganga Hot Springs', '⛺ Riverside Alpine Camps', '🌿 Tosh & Malana Trails'],
+    href: '/destination/kasol',
+  },
+  {
+    id: 'goa',
+    name: 'Goa Coastal',
+    region: 'Western India',
+    vibe: 'Coastal',
+    duration: '04 Days / 03 Nights',
+    rating: 4.8,
+    reviews: 192,
+    rank: '#05 MUST EXPLORE',
+    image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80',
+    description: 'Secluded golden beaches, Portuguese colonial architecture, bohemian sunset markets, and crystal coastal scuba.',
+    highlights: ['🏖️ Palolem & Cola Bay', '🏛️ Portuguese Baroque', '🏄 Scuba & Water Trails'],
+    href: '/destination/goa',
+  },
+  {
+    id: 'mussoorie',
+    name: 'Mussoorie',
+    region: 'Uttarakhand',
+    vibe: 'Coastal',
+    duration: '03 Days / 02 Nights',
+    rating: 4.7,
+    reviews: 110,
+    rank: '#06 MUST EXPLORE',
+    image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800&q=80',
+    description: 'The historic Queen of Hills — panoramic Himalayan sunsets, the famous winterline horizon, and misty pine trails.',
+    highlights: ['🌁 Winterline Horizon', '🌲 Benog Sanctuary', '🏡 Heritage Mountain Homes'],
+    href: '/destination/mussoorie',
+  },
+  {
+    id: 'bir-billing',
+    name: 'Bir Billing',
+    region: 'Himachal Pradesh',
+    vibe: 'Himalayan',
+    duration: '03 Days / 02 Nights',
+    rating: 4.9,
+    reviews: 140,
+    rank: '#07 MUST EXPLORE',
+    image: 'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=800&q=80',
+    description: 'World-renowned paragliding capital where you soar above emerald Tibetan monasteries and Dhauladhar cliffs.',
+    highlights: ['🪂 2400m Thermal Flights', '🛕 Chokling Monastery', '☕ Organic Tea Gardens'],
+    href: '/adventure/paragliding',
+  },
+  {
+    id: 'spiti-valley',
+    name: 'Spiti Valley',
+    region: 'Himachal Pradesh',
+    vibe: 'Hidden',
+    duration: '06 Days / 05 Nights',
+    rating: 5.0,
+    reviews: 178,
+    rank: '#08 MUST EXPLORE',
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+    description: 'The Middle Land between Tibet and India — 1000-year-old cliffside monasteries, lunar landscapes, and fossil villages.',
+    highlights: ['🏰 1000yr Key Monastery', '🌙 Chandra Taal Crescent', '🚙 High Pass 4x4 Overland'],
+    href: '/destination/ladakh',
+  },
+  {
+    id: 'meghalaya',
+    name: 'Meghalaya',
+    region: 'Northeast India',
+    vibe: 'Hidden',
+    duration: '05 Days / 04 Nights',
+    rating: 4.9,
+    reviews: 165,
+    rank: '#09 MUST EXPLORE',
+    image: 'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?w=800&q=80',
+    description: 'The Abode of Clouds — living bio-engineered root bridges, thunderous jungle waterfalls, and subterranean caves.',
+    highlights: ['🌿 Double Decker Root Bridge', '💧 Nohkalikai Falls', '🛶 Crystal Dawki River'],
+    href: '/adventure/trekking',
+  },
+];
+
+// Unified catalog derived from data.ts
+const UNIFIED_CATALOG: CatalogItem[] = [
   ...ADVENTURES.map((a): CatalogItem => {
     const numericPrice = parseInt(a.price.replace(/[^\d]/g, ''), 10) || 3999;
-    const isDay = a.duration.toLowerCase().includes('hour') || a.duration.toLowerCase().includes('min');
-    const isMulti = a.duration.toLowerCase().includes('day');
     return {
       id: a.id,
       name: a.name,
       location: a.location,
-      region: a.location === 'Rishikesh' ? 'Uttarakhand' : a.location === 'Bir Billing' || a.location === 'Manali' || a.location === 'Kasol' ? 'Himachal Pradesh' : 'Goa',
+      region: a.location === 'Rishikesh' ? 'Uttarakhand' : a.location === 'Goa' ? 'Western India' : 'Himachal Pradesh',
       type: 'Adventure',
-      category: a.id === 'rafting' || a.id === 'scuba' ? 'Water Adventures' :
+      category: a.id === 'rafting' || a.id === 'scuba' ? 'Water Sports' :
                 a.id === 'trekking' ? 'Trekking & Hiking' :
-                a.id === 'bungee' || a.id === 'paragliding' ? 'Air & Extreme' :
-                a.id === 'camping' ? 'Camping & Stays' : 'Extreme Adrenaline',
+                a.id === 'bungee' || a.id === 'paragliding' ? 'Air & Extreme' : 'Camping & Outdoors',
       difficulty: a.difficulty,
       duration: a.duration,
-      durationTier: isDay ? 'day' : isMulti ? 'multi' : 'short',
       price: a.price,
       numericPrice,
       rating: a.id === 'rafting' ? 4.9 : a.id === 'bungee' ? 4.9 : 4.8,
@@ -98,8 +214,7 @@ const UNIFIED_CATALOG: CatalogItem[] = [
       image: a.image,
       description: a.description,
       href: `/adventure/${a.id}`,
-      tags: [a.location, a.difficulty, 'Adventure', a.name],
-      isFeatured: a.id === 'rafting' || a.id === 'trekking' || a.id === 'bungee',
+      tags: [a.location, a.difficulty, 'Adventure'],
     };
   }),
   ...STAYS.map((s): CatalogItem => {
@@ -113,81 +228,37 @@ const UNIFIED_CATALOG: CatalogItem[] = [
       category: 'Boutique & Eco-Stays',
       difficulty: 'Comfort',
       duration: 'Nightly',
-      durationTier: 'short',
       price: s.price,
       numericPrice,
       rating: parseFloat(s.rating) || 4.7,
       reviews: 95,
       image: s.image,
-      description: `${s.amenities.join(' · ')}. Premier verified property with exceptional Himalayan or coastal hospitality.`,
+      description: `${s.amenities.join(' · ')}. Premier verified sanctuary with authentic Himalayan or coastal hospitality.`,
       href: `/stay/${s.id}`,
-      tags: [s.location, 'Stay', ...s.amenities],
-      isFeatured: s.id === 'riverside-retreat' || s.id === 'heritage-villa',
+      tags: [s.location, 'Stay', ...s.amenities.slice(0, 2)],
     };
   }),
   ...EXPERIENCES.map((e): CatalogItem => {
-    const numericPrice = e.id === 'local-food' ? 1499 : e.id === 'culture' ? 2200 : e.id === 'wellness' ? 4500 : e.id === 'photography' ? 9500 : 2800;
-    const isDay = e.duration.toLowerCase().includes('hour') || e.duration.toLowerCase().includes('half') || e.duration.toLowerCase().includes('full');
+    const numericPrice = e.id === 'local-food' ? 1499 : e.id === 'culture' ? 2200 : e.id === 'wellness' ? 4500 : 2800;
     return {
       id: e.id,
       name: e.name,
       location: e.location,
-      region: e.location,
+      region: e.location === 'Rishikesh' ? 'Uttarakhand' : 'Himachal Pradesh',
       type: 'Experience',
-      category: e.id === 'wellness' ? 'Wellness & Solitude' :
-                e.id === 'photography' ? 'High Altitude & Skies' :
-                e.id === 'nature' ? 'Nature & Trails' : 'Cultural & Culinary',
+      category: e.id === 'wellness' ? 'Wellness & Solitude' : 'Cultural & Culinary',
       difficulty: 'All Levels',
       duration: e.duration,
-      durationTier: isDay ? 'day' : 'multi',
       price: `₹${numericPrice.toLocaleString('en-IN')}`,
       numericPrice,
-      rating: e.id === 'photography' ? 5.0 : 4.9,
+      rating: 4.9,
       reviews: 86,
       image: e.image,
       description: e.description,
       href: `/experience/${e.id}`,
-      tags: [e.location, 'Experience', e.name],
-      isFeatured: e.id === 'local-food' || e.id === 'wellness' || e.id === 'photography',
+      tags: [e.location, 'Experience'],
     };
   }),
-];
-
-// Curated collections with real data items
-const CURATED_COLLECTIONS = [
-  {
-    id: 'uttarakhand-gems',
-    title: 'Hidden Gems of Uttarakhand & Parvati',
-    subtitle: 'From thunderous Himalayan rapids and cliffside bungee jumps to peaceful riverside camping.',
-    image: 'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?w=1200&q=80',
-    itemIds: ['rafting', 'bungee', 'camping', 'riverside-retreat', 'wellness'],
-  },
-  {
-    id: 'himalayan-expeditions',
-    title: 'High Himalayan Peaks & Trails',
-    subtitle: 'Trek across glacial alpine passes, fly over emerald valleys, and photograph starlit galaxies.',
-    image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1200&q=80',
-    itemIds: ['trekking', 'paragliding', 'photography', 'mountain-lodge', 'ladakh'],
-  },
-  {
-    id: 'heritage-solitude',
-    title: 'Riverside Solitude & Heritage Retreats',
-    subtitle: 'Unwind at tranquil ayurvedic riverside resorts, historic Goan villas, and artisanal tea hills.',
-    image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200&q=80',
-    itemIds: ['heritage-villa', 'riverside-retreat', 'nature', 'culture', 'local-food'],
-  },
-];
-
-// Quick interest categories with icons and counts
-const INTEREST_CATEGORIES = [
-  { id: 'water', label: 'Water Adventures', icon: Waves, query: 'Water', count: 3, image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=600&q=80' },
-  { id: 'trekking', label: 'Trekking & Hiking', icon: TreePine, query: 'Trekking', count: 3, image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=600&q=80' },
-  { id: 'camping', label: 'Camping & Stays', icon: Tent, query: 'Camping', count: 5, image: 'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?w=600&q=80' },
-  { id: 'air', label: 'Air & Extreme', icon: Wind, query: 'Extreme', count: 3, image: 'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=600&q=80' },
-  { id: 'culture', label: 'Cultural & Culinary', icon: Landmark, query: 'Culture', count: 4, image: 'https://images.unsplash.com/photo-1567337710282-00832b415979?w=600&q=80' },
-  { id: 'wellness', label: 'Wellness & Solitude', icon: Sparkle, query: 'Wellness', count: 2, image: 'https://images.unsplash.com/photo-1545389336-cf090694435e?w=600&q=80' },
-  { id: 'high-altitude', label: 'High Altitude Skies', icon: MountainSnow, query: 'Ladakh', count: 3, image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600&q=80' },
-  { id: 'weekend', label: 'Weekend Escapes', icon: Coffee, query: 'Rishikesh', count: 6, image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&q=80' },
 ];
 
 function ExploreContent() {
@@ -195,215 +266,148 @@ function ExploreContent() {
   const searchParams = useSearchParams();
   const { toggleFavorite, isFavorite, addToTrip } = useTrip();
 
-  // Search & Filter States initialized from URL or defaults
+  // Search & Filter States
   const [searchTerm, setSearchTerm] = useState(searchParams?.get('q') || '');
   const [selectedType, setSelectedType] = useState<string>(searchParams?.get('type') || 'All');
-  const [selectedLocation, setSelectedLocation] = useState<string>(searchParams?.get('location') || 'All');
+  const [selectedRegion, setSelectedRegion] = useState<string>(searchParams?.get('region') || 'All');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>(searchParams?.get('difficulty') || 'All');
-  const [selectedDuration, setSelectedDuration] = useState<string>(searchParams?.get('duration') || 'All');
-  const [maxPrice, setMaxPrice] = useState<number>(parseInt(searchParams?.get('maxPrice') || '15000', 10));
   const [sortBy, setSortBy] = useState<string>(searchParams?.get('sort') || 'recommended');
-
-  // UI state
-  const [activeCollectionId, setActiveCollectionId] = useState<string>(CURATED_COLLECTIONS[0].id);
-  const [visibleCount, setVisibleCount] = useState<number>(9);
-  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false);
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
+  
+  // Wall of Places Filter state
+  const [wallFilter, setWallFilter] = useState<'All' | 'Himalayan' | 'Valleys' | 'Coastal' | 'Hidden'>('All');
+  const [visibleCount, setVisibleCount] = useState<number>(6);
   const [addedItemFeedback, setAddedItemFeedback] = useState<string | null>(null);
 
-  // Sync state to URL without full refresh
+  // Sync state to URL
   useEffect(() => {
     const params = new URLSearchParams();
     if (searchTerm) params.set('q', searchTerm);
     if (selectedType !== 'All') params.set('type', selectedType);
-    if (selectedLocation !== 'All') params.set('location', selectedLocation);
+    if (selectedRegion !== 'All') params.set('region', selectedRegion);
     if (selectedDifficulty !== 'All') params.set('difficulty', selectedDifficulty);
-    if (selectedDuration !== 'All') params.set('duration', selectedDuration);
-    if (maxPrice < 15000) params.set('maxPrice', String(maxPrice));
     if (sortBy !== 'recommended') params.set('sort', sortBy);
 
-    const queryString = params.toString();
-    const targetUrl = queryString ? `/explore?${queryString}` : '/explore';
-    window.history.replaceState(null, '', targetUrl);
-  }, [searchTerm, selectedType, selectedLocation, selectedDifficulty, selectedDuration, maxPrice, sortBy]);
+    const qs = params.toString();
+    const url = qs ? `/explore?${qs}` : '/explore';
+    window.history.replaceState(null, '', url);
+  }, [searchTerm, selectedType, selectedRegion, selectedDifficulty, sortBy]);
 
-  // Handle hero quick search submit
-  const handleHeroSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const catalogEl = document.getElementById('catalog');
-    if (catalogEl) {
-      catalogEl.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  // Filtered Wall of Places
+  const filteredWallPlaces = useMemo(() => {
+    if (wallFilter === 'All') return MUST_EXPLORE_PLACES;
+    return MUST_EXPLORE_PLACES.filter((p) => p.vibe === wallFilter);
+  }, [wallFilter]);
 
-  // Quick chip click handler
-  const handleChipClick = (query: string, typeFilter: string = 'All') => {
-    setSearchTerm(query);
-    if (typeFilter !== 'All') setSelectedType(typeFilter);
-    const catalogEl = document.getElementById('catalog');
-    if (catalogEl) {
-      catalogEl.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  // Filter and sort items
-  const filteredItems = useMemo(() => {
+  // Filtered Catalog
+  const filteredCatalog = useMemo(() => {
     return UNIFIED_CATALOG.filter((item) => {
-      // 1. Text Search Filter
       if (searchTerm.trim()) {
         const q = searchTerm.toLowerCase();
         const matchesName = item.name.toLowerCase().includes(q);
         const matchesLoc = item.location.toLowerCase().includes(q);
-        const matchesDesc = item.description.toLowerCase().includes(q);
-        const matchesTags = item.tags.some((t) => t.toLowerCase().includes(q));
         const matchesCat = item.category.toLowerCase().includes(q);
-        if (!matchesName && !matchesLoc && !matchesDesc && !matchesTags && !matchesCat) {
-          return false;
-        }
+        const matchesDesc = item.description.toLowerCase().includes(q);
+        if (!matchesName && !matchesLoc && !matchesCat && !matchesDesc) return false;
       }
-
-      // 2. Type Filter (All, Destinations, Adventures, Stays, Experiences)
       if (selectedType !== 'All') {
-        if (selectedType === 'Destinations' && item.type !== 'Destination') return false;
         if (selectedType === 'Adventures' && item.type !== 'Adventure') return false;
         if (selectedType === 'Stays' && item.type !== 'Stay') return false;
         if (selectedType === 'Experiences' && item.type !== 'Experience') return false;
       }
-
-      // 3. Location Filter
-      if (selectedLocation !== 'All') {
-        const itemLoc = (item.location + ' ' + (item.region || '')).toLowerCase();
-        if (!itemLoc.includes(selectedLocation.toLowerCase())) return false;
+      if (selectedRegion !== 'All') {
+        const matchRegion = (item.region || item.location).toLowerCase();
+        if (!matchRegion.includes(selectedRegion.toLowerCase())) return false;
       }
-
-      // 4. Difficulty Filter
       if (selectedDifficulty !== 'All') {
         if (item.difficulty && item.difficulty !== selectedDifficulty && item.difficulty !== 'All Levels') {
           return false;
         }
       }
-
-      // 5. Duration Filter
-      if (selectedDuration !== 'All') {
-        if (selectedDuration === 'day' && item.durationTier !== 'day') return false;
-        if (selectedDuration === 'short' && item.durationTier !== 'short') return false;
-        if (selectedDuration === 'multi' && item.durationTier !== 'multi') return false;
-        if (selectedDuration === 'week' && item.durationTier !== 'week') return false;
-      }
-
-      // 6. Max Price Filter (Destinations always pass since they are gateways)
-      if (item.numericPrice > 0 && maxPrice < 15000 && item.numericPrice > maxPrice) {
-        return false;
-      }
-
       return true;
     }).sort((a, b) => {
-      if (sortBy === 'price-asc') {
-        return a.numericPrice - b.numericPrice;
-      }
-      if (sortBy === 'price-desc') {
-        return b.numericPrice - a.numericPrice;
-      }
-      if (sortBy === 'rating') {
-        return b.rating - a.rating;
-      }
-      if (sortBy === 'reviews') {
-        return b.reviews - a.reviews;
-      }
-      // 'recommended'
-      if (a.isFeatured && !b.isFeatured) return -1;
-      if (!a.isFeatured && b.isFeatured) return 1;
-      return b.rating - a.rating;
+      if (sortBy === 'price-low') return a.numericPrice - b.numericPrice;
+      if (sortBy === 'price-high') return b.numericPrice - a.numericPrice;
+      if (sortBy === 'rating') return b.rating - a.rating;
+      return b.reviews - a.reviews;
     });
-  }, [searchTerm, selectedType, selectedLocation, selectedDifficulty, selectedDuration, maxPrice, sortBy]);
+  }, [searchTerm, selectedType, selectedRegion, selectedDifficulty, sortBy]);
 
-  // Reset all filters
-  const resetFilters = useCallback(() => {
+  const handleFilterByPlace = (placeName: string) => {
+    setSearchTerm(placeName);
+    const catalogEl = document.getElementById('catalog');
+    if (catalogEl) {
+      catalogEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleAddTrip = (item: CatalogItem) => {
+    addToTrip({
+      id: item.id,
+      title: item.name,
+      location: item.location,
+      price: item.price,
+      image: item.image,
+      category: item.type.toLowerCase() as any,
+    });
+    setAddedItemFeedback(item.name);
+    setTimeout(() => setAddedItemFeedback(null), 3000);
+  };
+
+  const isAnyFilterActive = searchTerm || selectedType !== 'All' || selectedRegion !== 'All' || selectedDifficulty !== 'All';
+
+  const resetAllFilters = () => {
     setSearchTerm('');
     setSelectedType('All');
-    setSelectedLocation('All');
+    setSelectedRegion('All');
     setSelectedDifficulty('All');
-    setSelectedDuration('All');
-    setMaxPrice(15000);
     setSortBy('recommended');
-    setVisibleCount(9);
-  }, []);
-
-  // Count active non-default filters
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (searchTerm) count++;
-    if (selectedType !== 'All') count++;
-    if (selectedLocation !== 'All') count++;
-    if (selectedDifficulty !== 'All') count++;
-    if (selectedDuration !== 'All') count++;
-    if (maxPrice < 15000) count++;
-    if (sortBy !== 'recommended') count++;
-    return count;
-  }, [searchTerm, selectedType, selectedLocation, selectedDifficulty, selectedDuration, maxPrice, sortBy]);
-
-  // Wishlist toggle handler with toast
-  const handleWishlistToggle = (e: React.MouseEvent, itemId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleFavorite(itemId);
   };
-
-  // Add to trip handler
-  const handleAddToTrip = (e: React.MouseEvent, item: CatalogItem) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToTrip(
-      {
-        id: item.id,
-        name: item.name,
-        location: item.location,
-        price: item.price,
-        image: item.image,
-        duration: item.duration,
-        category: item.category,
-      },
-      item.type.toLowerCase() as any
-    );
-    setAddedItemFeedback(item.id);
-    setTimeout(() => {
-      setAddedItemFeedback((prev) => (prev === item.id ? null : prev));
-    }, 2000);
-  };
-
-  const activeCollection = CURATED_COLLECTIONS.find((c) => c.id === activeCollectionId) || CURATED_COLLECTIONS[0];
-  const activeCollectionItems = UNIFIED_CATALOG.filter((item) => activeCollection.itemIds.includes(item.id));
 
   return (
-    <div className="pt-20 pb-24 overflow-x-hidden">
-      {/* ── SECTION A: IMMERSIVE EXPLORE HERO ── */}
-      <section className="explore-hero-wrapper relative text-center">
-        <div className="explore-hero-backdrop" aria-hidden="true" />
-        <div className="explore-hero-grid-pattern" aria-hidden="true" />
+    <div className="pt-20 pb-24 bg-[#010611] text-[#F4F7FA]">
+      {/* ── TOAST NOTIFICATION ── */}
+      {addedItemFeedback && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl bg-emerald-950/90 border border-emerald-500/50 text-white shadow-2xl backdrop-blur-md animate-bounce">
+          <Check size={18} className="text-emerald-400" />
+          <span className="text-sm font-medium">Added <strong className="text-emerald-300">{addedItemFeedback}</strong> to your trip itinerary!</span>
+        </div>
+      )}
 
-        <div className="container relative z-10 px-4">
-          <div className="explore-hero__badge mb-4">
+      {/* ── SECTION 1: IMMERSIVE DISCOVERY HERO ── */}
+      <section className="explore-hero-wrapper">
+        <div className="explore-hero-backdrop" />
+        <div className="explore-hero-grid-pattern" />
+
+        <div className="container relative z-10 px-4 text-center max-w-5xl mx-auto">
+          <div className="explore-hero__badge">
             <Sparkles size={14} className="text-[var(--color-accent)] animate-pulse" />
-            <span>Gateway to the Subcontinent · Discovery & Expeditions</span>
+            <span>Curated Subcontinent Discovery</span>
           </div>
 
           <h1 className="explore-hero__title">
-            Your Next Adventure <span className="text-[var(--color-accent)]">Starts Here</span>
+            UNLEASH YOUR NEXT EXPEDITION
           </h1>
 
           <p className="explore-hero__subtitle">
-            Discover sacred river rapids, high-altitude passes, tranquil mountain eco-lodges, and vibrant heritage trails across India. Browse by mood, region, or expedition tier.
+            From thunderous Himalayan rapids and high passes to secluded coastal sanctuaries — travel smarter, explore deeper.
           </p>
 
-          {/* Functional Hero Search Panel */}
-          <form onSubmit={handleHeroSearch} className="explore-search-bar" role="search" aria-label="Explore Search">
+          {/* Unified Compact Search Bar */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const catEl = document.getElementById('catalog');
+              if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="explore-search-bar"
+          >
             <div className="explore-search-input-wrap">
               <Search size={18} strokeWidth={2} className="text-[var(--color-accent)] shrink-0" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search rafting, treks, stays, Kasol, Ladakh..."
+                placeholder="Search places, rafting, treks, Kasol, Ladakh..."
                 className="w-full bg-transparent border-none outline-none text-white text-sm font-medium placeholder:text-[var(--text-muted)]"
               />
               {searchTerm && (
@@ -421,61 +425,40 @@ function ExploreContent() {
             <div className="explore-search-select-wrap">
               <MapPin size={16} strokeWidth={2} className="text-[var(--color-accent)] shrink-0" />
               <select
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
+                value={selectedRegion}
+                onChange={(e) => setSelectedRegion(e.target.value)}
                 className="w-full bg-transparent border-none outline-none text-white text-sm cursor-pointer"
                 style={{ appearance: 'none' }}
-                aria-label="Filter by location"
+                aria-label="Filter by region"
               >
                 <option value="All" style={{ background: '#071B3A', color: '#fff' }}>All Regions</option>
-                <option value="Rishikesh" style={{ background: '#071B3A', color: '#fff' }}>Rishikesh (Uttarakhand)</option>
-                <option value="Manali" style={{ background: '#071B3A', color: '#fff' }}>Manali (Himachal)</option>
-                <option value="Ladakh" style={{ background: '#071B3A', color: '#fff' }}>Ladakh (Himalayas)</option>
-                <option value="Goa" style={{ background: '#071B3A', color: '#fff' }}>Goa (Coastal)</option>
-                <option value="Kasol" style={{ background: '#071B3A', color: '#fff' }}>Kasol (Parvati Valley)</option>
-                <option value="Mussoorie" style={{ background: '#071B3A', color: '#fff' }}>Mussoorie (Queen of Hills)</option>
-                <option value="Bir Billing" style={{ background: '#071B3A', color: '#fff' }}>Bir Billing (Air Sports)</option>
+                <option value="Uttarakhand" style={{ background: '#071B3A', color: '#fff' }}>Uttarakhand</option>
+                <option value="Himachal" style={{ background: '#071B3A', color: '#fff' }}>Himachal Pradesh</option>
+                <option value="Ladakh" style={{ background: '#071B3A', color: '#fff' }}>Ladakh & Zanskar</option>
+                <option value="Goa" style={{ background: '#071B3A', color: '#fff' }}>Coastal Goa</option>
               </select>
             </div>
 
-            <div className="explore-search-select-wrap">
-              <Compass size={16} strokeWidth={2} className="text-[var(--color-accent)] shrink-0" />
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full bg-transparent border-none outline-none text-white text-sm cursor-pointer"
-                style={{ appearance: 'none' }}
-                aria-label="Filter by category"
-              >
-                <option value="All" style={{ background: '#071B3A', color: '#fff' }}>All Categories</option>
-                <option value="Destinations" style={{ background: '#071B3A', color: '#fff' }}>Destinations</option>
-                <option value="Adventures" style={{ background: '#071B3A', color: '#fff' }}>Adventures</option>
-                <option value="Stays" style={{ background: '#071B3A', color: '#fff' }}>Handpicked Stays</option>
-                <option value="Experiences" style={{ background: '#071B3A', color: '#fff' }}>Experiences</option>
-              </select>
-            </div>
-
-            <button type="submit" className="btn btn--primary text-xs uppercase px-6 py-3 rounded-lg flex items-center justify-center gap-2">
-              <span>Explore</span>
+            <button type="submit" className="btn btn--primary text-xs uppercase px-7 py-3 rounded-lg flex items-center justify-center gap-2">
+              <span>Search</span>
               <ArrowRight size={14} strokeWidth={2} />
             </button>
           </form>
 
           {/* Quick Discovery Chips */}
-          <div className="explore-chips-container">
+          <div className="explore-chips-container mt-4">
             <span className="text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold mr-1">Trending:</span>
             {[
-              { label: '🌊 Ganges Rafting', query: 'Rafting', type: 'Adventures' },
-              { label: '🏔️ Himalayan Treks', query: 'Trekking', type: 'Adventures' },
-              { label: '🏡 Riverside Stays', query: 'Riverside', type: 'Stays' },
-              { label: '⛺ Parvati Camping', query: 'Camping', type: 'Adventures' },
-              { label: '🪂 Paragliding Bir', query: 'Paragliding', type: 'Adventures' },
-              { label: '💎 Hidden Valley Gems', query: 'Kasol', type: 'Destinations' },
+              { label: '🌊 Ganges Rafting', query: 'Rishikesh' },
+              { label: '🏔️ High Passes', query: 'Ladakh' },
+              { label: '🪂 Paragliding', query: 'Bir Billing' },
+              { label: '🌲 Parvati Valleys', query: 'Kasol' },
+              { label: '🏖️ Golden Shores', query: 'Goa' },
             ].map((chip, idx) => (
               <button
                 key={idx}
                 type="button"
-                onClick={() => handleChipClick(chip.query, chip.type)}
+                onClick={() => handleFilterByPlace(chip.query)}
                 className="explore-chip"
               >
                 {chip.label}
@@ -485,751 +468,366 @@ function ExploreContent() {
         </div>
       </section>
 
-      {/* ── SECTION B: EXPLORE DESTINATIONS (Editorial Asymmetrical Layout) ── */}
-      <section className="section py-16" id="destinations">
+      {/* ── SECTION 2: THE WALL OF MUST-EXPLORE PLACES (THE SHOWSTOPPER) ── */}
+      <section className="section py-16" id="places-wall">
         <div className="container px-4">
           <div className="explore-section-header">
             <div>
               <span className="explore-section-eyebrow">
                 <MapPin size={13} strokeWidth={2} />
-                <span>Iconic Landscapes</span>
+                <span>Must-Explore Places of India</span>
               </span>
-              <h2 className="explore-section-title">Where Will You Go Next?</h2>
+              <h2 className="explore-section-title">THE EXPLORER'S WALL</h2>
               <p className="explore-section-subtitle">
-                From glacial Himalayan heights to sacred river confluences and bohemian coastlines.
+                Nine iconic landscapes across the subcontinent that demand to be experienced in this lifetime. Each place hand-selected with verified adventures.
               </p>
             </div>
-            <Link href="/destinations" className="text-xs text-[var(--color-accent)] font-semibold tracking-wider uppercase hover:underline flex items-center gap-1.5">
-              <span>View All Destinations ({DESTINATIONS.length})</span>
-              <ArrowRight size={13} strokeWidth={2} />
-            </Link>
-          </div>
-
-          <div className="dest-editorial-grid">
-            {/* Featured Hero Card: Rishikesh */}
-            <div className="dest-editorial-featured">
-              <Link href="/destination/rishikesh" className="card--poster h-full block group relative">
-                <img
-                  src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=1200&q=80"
-                  alt="Rishikesh"
-                  className="card__image"
-                  loading="lazy"
-                />
-                <div className="card__overlay" />
-                <div className="card__top-meta">
-                  <span className="label label--accent">Featured Expedition</span>
-                  <span className="label">03 Days · Uttarakhand</span>
-                </div>
-                <div className="card__content">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-amber-400 flex items-center text-xs font-semibold gap-1">
-                      <Star size={13} className="fill-amber-400" /> 4.9 (184 verified reviews)
-                    </span>
-                  </div>
-                  <h3 className="card__title text-3xl md:text-5xl">Rishikesh</h3>
-                  <p className="text-sm text-[var(--text-secondary)] line-clamp-2 max-w-xl mb-4">
-                    The adventure capital of India, nestled in the foothills of the Himalayas along the sacred turquoise waters of the Ganges.
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {['White Water Rafting', '83m Fixed Bungee', 'Riverside Yoga', 'Ganga Aarti'].map((tag, tIdx) => (
-                      <span key={tIdx} className="text-xs px-2.5 py-1 rounded-md bg-white/10 backdrop-blur-sm text-white/90 border border-white/10">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <span className="card__cta text-sm font-semibold text-[var(--foreground-accent-high-contrast)] flex items-center gap-2 group-hover:gap-3 transition-all">
-                    <span>Explore Full Destination Guide</span>
-                    <ArrowRight size={14} strokeWidth={2} />
-                  </span>
-                </div>
-              </Link>
-            </div>
-
-            {/* Side Column: Ladakh & Manali */}
-            <div className="dest-editorial-side-col">
-              <div className="dest-editorial-side-card">
-                <Link href="/destination/ladakh" className="card--poster h-full block group relative">
-                  <img
-                    src="https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800&q=80"
-                    alt="Ladakh"
-                    className="card__image"
-                    loading="lazy"
-                  />
-                  <div className="card__overlay" />
-                  <div className="card__top-meta">
-                    <span className="label">07 Days</span>
-                    <span className="label label--accent">Himalayas</span>
-                  </div>
-                  <div className="card__content">
-                    <h3 className="card__title text-2xl md:text-3xl">Ladakh</h3>
-                    <p className="card__subtitle">High Passes & Starlit Skies</p>
-                    <span className="card__cta text-xs">Explore Destination <ArrowRight size={12} strokeWidth={2} /></span>
-                  </div>
-                </Link>
-              </div>
-
-              <div className="dest-editorial-side-card">
-                <Link href="/destination/manali" className="card--poster h-full block group relative">
-                  <img
-                    src="https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&q=80"
-                    alt="Manali"
-                    className="card__image"
-                    loading="lazy"
-                  />
-                  <div className="card__overlay" />
-                  <div className="card__top-meta">
-                    <span className="label">04 Days</span>
-                    <span className="label label--accent">Himachal Pradesh</span>
-                  </div>
-                  <div className="card__content">
-                    <h3 className="card__title text-2xl md:text-3xl">Manali</h3>
-                    <p className="card__subtitle">Pine Valleys & Alpine Treks</p>
-                    <span className="card__cta text-xs">Explore Destination <ArrowRight size={12} strokeWidth={2} /></span>
-                  </div>
-                </Link>
-              </div>
-            </div>
-
-            {/* Bottom Row: Goa, Kasol, Mussoorie */}
-            {[
-              { d: DESTINATIONS[3], subtitle: 'Portuguese Heritage & Golden Shores' },
-              { d: DESTINATIONS[4], subtitle: 'Parvati Valley Mountain Magic' },
-              { d: DESTINATIONS[5], subtitle: 'Queen of the Hills & Misty Trails' },
-            ].map(({ d, subtitle }) => (
-              <div key={d.id} className="dest-editorial-bottom-card">
-                <Link href={`/destination/${d.id}`} className="card--poster h-full block group relative">
-                  <img src={d.image} alt={d.name} className="card__image" loading="lazy" />
-                  <div className="card__overlay" />
-                  <div className="card__top-meta">
-                    <span className="label">{d.category}</span>
-                    <span className="label label--accent">{d.days}</span>
-                  </div>
-                  <div className="card__content">
-                    <h3 className="card__title text-2xl">{d.name}</h3>
-                    <p className="card__subtitle">{subtitle}</p>
-                    <span className="card__cta text-xs">Explore <ArrowRight size={12} strokeWidth={2} /></span>
-                  </div>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION C: EXPLORE BY INTEREST (Category Discovery) ── */}
-      <section className="section py-16 bg-gradient-to-b from-[#010611] via-[#071B3A]/40 to-[#010611]" id="interests">
-        <div className="container px-4">
-          <div className="explore-section-header">
-            <div>
-              <span className="explore-section-eyebrow">
-                <Compass size={13} strokeWidth={2} />
-                <span>Curated By Activity</span>
-              </span>
-              <h2 className="explore-section-title">Choose Your Adventure Style</h2>
-              <p className="explore-section-subtitle">
-                Don't know where to go? Browse curated experience genres tailored to your travel mood.
-              </p>
-            </div>
-            <button
-              onClick={() => { setSelectedType('All'); setSearchTerm(''); const el = document.getElementById('catalog'); el?.scrollIntoView({ behavior: 'smooth' }); }}
+            <Link
+              href="/destinations"
               className="text-xs text-[var(--color-accent)] font-semibold tracking-wider uppercase hover:underline flex items-center gap-1.5"
             >
-              <span>Browse All Categories</span>
-              <ArrowRight size={13} strokeWidth={2} />
-            </button>
-          </div>
-
-          <div className="interest-grid">
-            {INTEREST_CATEGORIES.map((cat) => {
-              const IconComp = cat.icon;
-              return (
-                <div
-                  key={cat.id}
-                  onClick={() => handleChipClick(cat.query)}
-                  className="interest-card group"
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Explore ${cat.label}`}
-                >
-                  <div
-                    className="interest-card__bg"
-                    style={{ backgroundImage: `url(${cat.image})` }}
-                    aria-hidden="true"
-                  />
-                  <div className="interest-card__overlay" aria-hidden="true" />
-                  
-                  <div className="interest-card__content">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="w-10 h-10 rounded-lg bg-[var(--color-accent-dim)] border border-[var(--color-accent)]/30 flex items-center justify-center text-[var(--color-accent)] group-hover:scale-110 transition-transform">
-                        <IconComp size={20} strokeWidth={2} />
-                      </div>
-                      <span className="text-xs px-2.5 py-1 rounded-full bg-white/10 text-[var(--text-secondary)] font-semibold backdrop-blur-sm">
-                        {cat.count} Options
-                      </span>
-                    </div>
-
-                    <h3 className="interest-card__title group-hover:text-[var(--color-accent)] transition-colors">
-                      {cat.label}
-                    </h3>
-                    <p className="text-xs text-[var(--text-muted)] flex items-center gap-1">
-                      <span>Instant Filter</span>
-                      <ChevronRight size={12} strokeWidth={2} className="text-[var(--color-accent)]" />
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION D: FEATURED ADVENTURES & EXPERIENCES ── */}
-      <section className="section py-16" id="featured-adventures">
-        <div className="container px-4">
-          <div className="explore-section-header">
-            <div>
-              <span className="explore-section-eyebrow">
-                <Sparkles size={13} strokeWidth={2} />
-                <span>Editor's Handpicked</span>
-              </span>
-              <h2 className="explore-section-title">Signature Indian Expeditions</h2>
-              <p className="explore-section-subtitle">
-                Verified certified guides, private local operators, and premier high-altitude experiences.
-              </p>
-            </div>
-            <Link href="/adventures" className="text-xs text-[var(--color-accent)] font-semibold tracking-wider uppercase hover:underline flex items-center gap-1.5">
-              <span>View All Adventures ({ADVENTURES.length})</span>
+              <span>Explore All Destinations ({DESTINATIONS.length})</span>
               <ArrowRight size={13} strokeWidth={2} />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {UNIFIED_CATALOG.filter((i) => i.isFeatured && (i.type === 'Adventure' || i.type === 'Stay')).slice(0, 6).map((item) => {
-              const saved = isFavorite(item.id);
-              const isAdded = addedItemFeedback === item.id;
-              return (
-                <div key={item.id} className="card--poster aspect-[4/5] block group relative">
-                  <img src={item.image} alt={item.name} className="card__image" loading="lazy" />
-                  <div className="card__overlay" />
-
-                  {/* Top Wishlist and Badges */}
-                  <div className="card__top-meta flex items-center justify-between">
-                    <div className="flex gap-2">
-                      <span className="label label--accent">{item.difficulty || item.type}</span>
-                      <span className="label flex items-center gap-1">
-                        <Clock size={11} strokeWidth={2} /> {item.duration}
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={(e) => handleWishlistToggle(e, item.id)}
-                      className={`card-wishlist-btn ${saved ? 'card-wishlist-btn--active text-red-500 fill-red-500' : ''}`}
-                      aria-label={saved ? 'Remove from wishlist' : 'Save to wishlist'}
-                    >
-                      <Heart size={16} className={saved ? 'fill-red-500' : ''} />
-                    </button>
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="card__content">
-                    <div className="flex items-center justify-between text-xs mb-1.5">
-                      <span className="text-[var(--text-muted)] flex items-center gap-1">
-                        <MapPin size={12} strokeWidth={2} className="text-[var(--color-accent)]" />
-                        {item.location}
-                      </span>
-                      <span className="text-amber-400 flex items-center gap-1 font-semibold">
-                        <Star size={12} className="fill-amber-400" /> {item.rating}
-                      </span>
-                    </div>
-
-                    <h3 className="card__title text-xl md:text-2xl mb-1.5">{item.name}</h3>
-                    <p className="text-xs text-[var(--text-secondary)] line-clamp-2 mb-3">
-                      {item.description}
-                    </p>
-
-                    <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                      <div>
-                        <span className="text-xs text-[var(--text-muted)] block uppercase font-medium">Starting from</span>
-                        <span className="text-base font-bold text-[var(--color-accent)]">{item.price}</span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={(e) => handleAddToTrip(e, item)}
-                          className="btn btn--secondary btn--sm px-3 py-1.5 rounded text-xs flex items-center gap-1"
-                          title="Add directly to your Trip Builder"
-                        >
-                          {isAdded ? <Check size={12} className="text-emerald-400" /> : <Plus size={12} />}
-                          <span>{isAdded ? 'Added' : 'Trip'}</span>
-                        </button>
-                        <Link href={item.href} className="btn btn--primary btn--sm px-3 py-1.5 rounded text-xs flex items-center gap-1">
-                          <span>Details</span>
-                          <ArrowRight size={12} strokeWidth={2} />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION E: HIDDEN GEMS & CURATED COLLECTIONS ── */}
-      <section className="section py-16 bg-[#071B3A]/30 border-y border-white/5" id="collections">
-        <div className="container px-4">
-          <div className="explore-section-header">
-            <div>
-              <span className="explore-section-eyebrow">
-                <Sparkle size={13} strokeWidth={2} />
-                <span>Off The Beaten Track</span>
-              </span>
-              <h2 className="explore-section-title">Curated Travel Collections</h2>
-              <p className="explore-section-subtitle">
-                Themed journeys for explorers looking for tranquil riverbeds, high alpine passes, and heritage serenity.
-              </p>
-            </div>
-          </div>
-
-          {/* Collection Selection Tabs */}
-          <div className="collection-tabs" role="tablist">
-            {CURATED_COLLECTIONS.map((col) => (
+          {/* Interactive Wall Filter Pills */}
+          <div className="places-wall-filter-bar">
+            {[
+              { id: 'All', label: 'All Must-Explore (9)' },
+              { id: 'Himalayan', label: '🏔️ Himalayan Summits' },
+              { id: 'Valleys', label: '🌊 Sacred Rapids & Valleys' },
+              { id: 'Coastal', label: '🏖️ Coastal & Heritage' },
+              { id: 'Hidden', label: '🌿 Off-the-Grid Hidden' },
+            ].map((tab) => (
               <button
-                key={col.id}
-                role="tab"
-                aria-selected={activeCollectionId === col.id}
-                onClick={() => setActiveCollectionId(col.id)}
-                className={`collection-tab-btn ${activeCollectionId === col.id ? 'collection-tab-btn--active' : ''}`}
+                key={tab.id}
+                type="button"
+                onClick={() => setWallFilter(tab.id as any)}
+                className={`places-wall-filter-btn ${wallFilter === tab.id ? 'places-wall-filter-btn--active' : ''}`}
               >
-                {col.title}
+                {tab.label}
               </button>
             ))}
           </div>
 
-          {/* Active Collection Showcase */}
-          <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-r from-[var(--bg-secondary)]/90 to-[var(--bg-primary)] border border-white/10 mb-8">
-            <div className="max-w-2xl mb-6">
-              <span className="badge mb-2">Featured Editorial Collection</span>
-              <h3 className="text-2xl md:text-3xl font-bold uppercase tracking-wide text-white mb-2">
-                {activeCollection.title}
-              </h3>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                {activeCollection.subtitle}
-              </p>
-            </div>
+          {/* The Wall Grid: Strict Proportional 16:10 Fitted Cards */}
+          <div className="places-wall-grid">
+            {filteredWallPlaces.map((place) => {
+              const favorited = isFavorite(place.id);
+              return (
+                <div key={place.id} className="place-wall-card group">
+                  <div className="place-wall-card__media">
+                    <img
+                      src={place.image}
+                      alt={place.name}
+                      className="place-wall-card__img"
+                      loading="lazy"
+                    />
+                    <div className="place-wall-card__gradient" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-              {activeCollectionItems.map((item) => (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  className="card--poster aspect-[3/4] block group relative"
-                >
-                  <img src={item.image} alt={item.name} className="card__image" loading="lazy" />
-                  <div className="card__overlay" />
-                  <div className="card__top-meta">
-                    <span className="label label--accent">{item.type}</span>
-                    <span className="label">{item.location}</span>
-                  </div>
-                  <div className="card__content">
-                    <h4 className="card__title text-lg md:text-xl mb-1">{item.name}</h4>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-xs font-bold text-[var(--color-accent)]">{item.price}</span>
-                      <span className="card__cta text-xs">Explore <ArrowRight size={11} strokeWidth={2} /></span>
+                    {/* Top Row: Rank Badge & Wishlist Heart */}
+                    <div className="place-wall-card__top">
+                      <span className="place-wall-card__rank">{place.rank}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleFavorite(place.id);
+                        }}
+                        className={`card-wishlist-btn ${favorited ? 'card-wishlist-btn--active' : ''}`}
+                        aria-label={favorited ? 'Remove from wishlist' : 'Add to wishlist'}
+                      >
+                        <Heart size={16} className={favorited ? 'fill-red-500 text-red-500' : ''} />
+                      </button>
+                    </div>
+
+                    {/* Bottom Content Body */}
+                    <div className="place-wall-card__body">
+                      <div className="place-wall-card__location">
+                        <MapPin size={11} strokeWidth={2.5} />
+                        <span>{place.region} · {place.duration}</span>
+                      </div>
+
+                      <h3 className="place-wall-card__title">{place.name}</h3>
+                      <p className="place-wall-card__desc">{place.description}</p>
+
+                      {/* Highlights */}
+                      <div className="place-wall-card__tags">
+                        {place.highlights.map((h, i) => (
+                          <span key={i} className="place-wall-card__tag">
+                            {h}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Card Actions */}
+                      <div className="place-wall-card__actions">
+                        <Link href={place.href} className="place-wall-card__cta">
+                          <span>Explore Place</span>
+                          <ArrowRight size={13} strokeWidth={2} />
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleFilterByPlace(place.name)}
+                          className="text-xs text-[var(--text-muted)] hover:text-[var(--color-accent)] font-semibold transition-colors flex items-center gap-1"
+                        >
+                          <span>Filter Expeditions</span>
+                          <ChevronRight size={12} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </Link>
-              ))}
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ── SECTION F: COMPLETE SEARCHABLE & FILTERABLE CATALOG ── */}
+      {/* ── SECTION 3: SIMPLIFIED EXPEDITIONS & STAYS DIRECTORY ── */}
       <section className="section py-16" id="catalog">
         <div className="container px-4">
           <div className="explore-section-header">
             <div>
               <span className="explore-section-eyebrow">
-                <Sliders size={13} strokeWidth={2} />
-                <span>Interactive Directory</span>
+                <Compass size={13} strokeWidth={2} />
+                <span>Unified Catalog</span>
               </span>
-              <h2 className="explore-section-title">Complete Expedition Catalog</h2>
+              <h2 className="explore-section-title">EXPEDITION & STAYS DIRECTORY</h2>
               <p className="explore-section-subtitle">
-                Filter and compare 20+ verified adventures, handpicked stays, cultural experiences, and destinations across India.
+                Verified adventures, high alpine treks, boutique lodges, and authentic local experiences.
               </p>
             </div>
-            <div className="text-sm font-semibold text-[var(--foreground-accent-high-contrast)] flex items-center gap-2">
-              <span>Showing {filteredItems.length} of {UNIFIED_CATALOG.length} experiences</span>
-            </div>
+
+            {isAnyFilterActive && (
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="text-xs text-[var(--text-muted)] hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-white/10 hover:border-white/30 transition-all"
+              >
+                <RotateCcw size={12} />
+                <span>Reset All Filters</span>
+              </button>
+            )}
           </div>
 
-          {/* Catalog Toolbar */}
+          {/* Clean Directory Controls */}
           <div className="catalog-toolbar">
-            {/* Category Filter Pills */}
-            <div className="flex gap-2.5 overflow-x-auto pb-3 mb-4 scrollbar-none">
-              {(['All', 'Destinations', 'Adventures', 'Stays', 'Experiences'] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setSelectedType(t)}
-                  className={`tag cursor-pointer px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-full transition-all ${
-                    selectedType === t
-                      ? 'bg-[var(--color-accent)] text-[var(--bg-primary)] font-bold shadow-md shadow-[var(--color-accent)]/20'
-                      : 'bg-white/5 hover:bg-white/10 text-[var(--text-secondary)] border border-white/10'
-                  }`}
-                >
-                  {t} ({t === 'All' ? UNIFIED_CATALOG.length : UNIFIED_CATALOG.filter((i) => i.type.startsWith(t.slice(0, 4))).length})
-                </button>
-              ))}
-            </div>
-
-            {/* Search Input, Sort & Filter Toggles */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-              {/* Keyword Search */}
-              <div className="md:col-span-6 flex items-center gap-2 px-3.5 py-2.5 rounded-lg bg-black/30 border border-white/15 focus-within:border-[var(--color-accent)] transition-colors">
-                <Search size={16} strokeWidth={2} className="text-[var(--text-muted)] shrink-0" />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Filter by keyword, location, or activity..."
-                  className="w-full bg-transparent border-none outline-none text-xs md:text-sm text-white placeholder:text-[var(--text-muted)] font-medium"
-                />
-                {searchTerm && (
-                  <button type="button" onClick={() => setSearchTerm('')} className="text-[var(--text-muted)] hover:text-white" aria-label="Clear filter search">
-                    <X size={14} />
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              {/* Category Filter Pills */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                {[
+                  { id: 'All', label: 'All Catalog' },
+                  { id: 'Adventures', label: 'Adventures' },
+                  { id: 'Stays', label: 'Stays' },
+                  { id: 'Experiences', label: 'Experiences' },
+                ].map((type) => (
+                  <button
+                    key={type.id}
+                    type="button"
+                    onClick={() => setSelectedType(type.id)}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap ${
+                      selectedType === type.id
+                        ? 'bg-[var(--color-accent)] text-[var(--bg-primary)] shadow-md shadow-cyan-500/20'
+                        : 'bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {type.label}
                   </button>
-                )}
+                ))}
               </div>
 
-              {/* Sort Dropdown */}
-              <div className="md:col-span-3 flex items-center gap-2 px-3 py-2.5 rounded-lg bg-black/30 border border-white/15">
-                <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider whitespace-nowrap">Sort:</span>
+              {/* Right Dropdowns */}
+              <div className="flex flex-wrap items-center gap-3">
+                <select
+                  value={selectedRegion}
+                  onChange={(e) => setSelectedRegion(e.target.value)}
+                  className="bg-[#030B1C] border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none cursor-pointer"
+                  aria-label="Filter by Region"
+                >
+                  <option value="All">All Regions</option>
+                  <option value="Uttarakhand">Uttarakhand</option>
+                  <option value="Himachal">Himachal Pradesh</option>
+                  <option value="Ladakh">Ladakh</option>
+                  <option value="Goa">Goa</option>
+                </select>
+
+                <select
+                  value={selectedDifficulty}
+                  onChange={(e) => setSelectedDifficulty(e.target.value)}
+                  className="bg-[#030B1C] border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none cursor-pointer"
+                  aria-label="Filter by Difficulty"
+                >
+                  <option value="All">All Difficulties</option>
+                  <option value="Easy">Easy</option>
+                  <option value="Moderate">Moderate</option>
+                  <option value="Extreme">Extreme</option>
+                </select>
+
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-xs text-white font-medium cursor-pointer"
-                  style={{ appearance: 'none' }}
-                  aria-label="Sort catalog by"
+                  className="bg-[#030B1C] border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none cursor-pointer"
+                  aria-label="Sort Results"
                 >
-                  <option value="recommended" style={{ background: '#071B3A', color: '#fff' }}>Recommended</option>
-                  <option value="price-asc" style={{ background: '#071B3A', color: '#fff' }}>Price: Low to High</option>
-                  <option value="price-desc" style={{ background: '#071B3A', color: '#fff' }}>Price: High to Low</option>
-                  <option value="rating" style={{ background: '#071B3A', color: '#fff' }}>Highest Rated</option>
-                  <option value="reviews" style={{ background: '#071B3A', color: '#fff' }}>Most Reviewed</option>
+                  <option value="recommended">Featured / Recommended</option>
+                  <option value="rating">Top Rated</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
                 </select>
               </div>
-
-              {/* Filter Toggles */}
-              <div className="md:col-span-3 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className={`btn flex-1 py-2.5 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all ${
-                    showAdvancedFilters || activeFiltersCount > 0
-                      ? 'btn--primary'
-                      : 'btn--secondary'
-                  }`}
-                >
-                  <SlidersHorizontal size={13} strokeWidth={2} />
-                  <span>Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}</span>
-                </button>
-
-                {activeFiltersCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={resetFilters}
-                    className="btn btn--ghost px-3 py-2.5 rounded-lg text-xs flex items-center gap-1 text-[var(--text-muted)] hover:text-white"
-                    title="Reset all filters"
-                  >
-                    <RotateCcw size={13} />
-                  </button>
-                )}
-              </div>
             </div>
-
-            {/* Advanced Filters Expandable Drawer on Desktop */}
-            {showAdvancedFilters && (
-              <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in duration-200">
-                {/* Destination Dropdown */}
-                <div>
-                  <label className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold block mb-1.5">
-                    Location / Region
-                  </label>
-                  <select
-                    value={selectedLocation}
-                    onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="w-full bg-black/40 border border-white/15 rounded-md px-3 py-2 text-xs text-white"
-                  >
-                    <option value="All">All Locations</option>
-                    <option value="Rishikesh">Rishikesh</option>
-                    <option value="Manali">Manali</option>
-                    <option value="Ladakh">Ladakh</option>
-                    <option value="Goa">Goa</option>
-                    <option value="Kasol">Kasol</option>
-                    <option value="Mussoorie">Mussoorie</option>
-                    <option value="Bir Billing">Bir Billing</option>
-                    <option value="Varanasi">Varanasi</option>
-                    <option value="Jaipur">Jaipur</option>
-                    <option value="Munnar">Munnar</option>
-                  </select>
-                </div>
-
-                {/* Difficulty Dropdown */}
-                <div>
-                  <label className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold block mb-1.5">
-                    Difficulty Level
-                  </label>
-                  <select
-                    value={selectedDifficulty}
-                    onChange={(e) => setSelectedDifficulty(e.target.value)}
-                    className="w-full bg-black/40 border border-white/15 rounded-md px-3 py-2 text-xs text-white"
-                  >
-                    <option value="All">All Tiers</option>
-                    <option value="Easy">Easy</option>
-                    <option value="Easy–Moderate">Easy–Moderate</option>
-                    <option value="Moderate">Moderate</option>
-                    <option value="Moderate–Hard">Moderate–Hard</option>
-                    <option value="Extreme">Extreme</option>
-                  </select>
-                </div>
-
-                {/* Duration Dropdown */}
-                <div>
-                  <label className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold block mb-1.5">
-                    Duration
-                  </label>
-                  <select
-                    value={selectedDuration}
-                    onChange={(e) => setSelectedDuration(e.target.value)}
-                    className="w-full bg-black/40 border border-white/15 rounded-md px-3 py-2 text-xs text-white"
-                  >
-                    <option value="All">Any Duration</option>
-                    <option value="day">Day Trip (&lt; 1 Day)</option>
-                    <option value="short">1–3 Days</option>
-                    <option value="multi">4–7 Days</option>
-                    <option value="week">7+ Days</option>
-                  </select>
-                </div>
-
-                {/* Max Price Range */}
-                <div>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold">
-                      Max Price:
-                    </label>
-                    <span className="text-xs font-bold text-[var(--color-accent)]">
-                      {maxPrice >= 15000 ? 'Any Budget' : `₹${maxPrice.toLocaleString('en-IN')}`}
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="1000"
-                    max="15000"
-                    step="500"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(parseInt(e.target.value, 10))}
-                    className="w-full accent-[var(--color-accent)] cursor-pointer"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Active Filter Badges */}
-            {activeFiltersCount > 0 && (
-              <div className="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-white/10 text-xs">
-                <span className="text-[var(--text-muted)] font-medium">Active filters:</span>
-                {searchTerm && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[var(--color-accent-dim)] text-[var(--color-accent)] border border-[var(--color-accent)]/30">
-                    Query: "{searchTerm}"
-                    <button type="button" onClick={() => setSearchTerm('')}><X size={12} /></button>
-                  </span>
-                )}
-                {selectedType !== 'All' && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[var(--color-accent-dim)] text-[var(--color-accent)] border border-[var(--color-accent)]/30">
-                    Category: {selectedType}
-                    <button type="button" onClick={() => setSelectedType('All')}><X size={12} /></button>
-                  </span>
-                )}
-                {selectedLocation !== 'All' && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[var(--color-accent-dim)] text-[var(--color-accent)] border border-[var(--color-accent)]/30">
-                    Location: {selectedLocation}
-                    <button type="button" onClick={() => setSelectedLocation('All')}><X size={12} /></button>
-                  </span>
-                )}
-                {selectedDifficulty !== 'All' && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[var(--color-accent-dim)] text-[var(--color-accent)] border border-[var(--color-accent)]/30">
-                    Tier: {selectedDifficulty}
-                    <button type="button" onClick={() => setSelectedDifficulty('All')}><X size={12} /></button>
-                  </span>
-                )}
-                {selectedDuration !== 'All' && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[var(--color-accent-dim)] text-[var(--color-accent)] border border-[var(--color-accent)]/30">
-                    Duration: {selectedDuration}
-                    <button type="button" onClick={() => setSelectedDuration('All')}><X size={12} /></button>
-                  </span>
-                )}
-                {maxPrice < 15000 && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[var(--color-accent-dim)] text-[var(--color-accent)] border border-[var(--color-accent)]/30">
-                    Under ₹{maxPrice.toLocaleString('en-IN')}
-                    <button type="button" onClick={() => setMaxPrice(15000)}><X size={12} /></button>
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={resetFilters}
-                  className="text-[var(--text-muted)] hover:text-white underline ml-2 cursor-pointer"
-                >
-                  Clear All
-                </button>
-              </div>
-            )}
           </div>
 
-          {/* Results Grid */}
-          {filteredItems.length > 0 ? (
-            <>
-              <div className="catalog-card-grid">
-                {filteredItems.slice(0, visibleCount).map((item) => {
-                  const saved = isFavorite(item.id);
-                  const isAdded = addedItemFeedback === item.id;
-                  return (
-                    <div key={item.id} className="card--poster aspect-[4/5] block group relative">
-                      <img src={item.image} alt={item.name} className="card__image" loading="lazy" />
-                      <div className="card__overlay" />
+          {/* Catalog Grid */}
+          {filteredCatalog.length === 0 ? (
+            <div className="text-center py-20 px-4 rounded-2xl bg-white/5 border border-white/10 max-w-lg mx-auto">
+              <Compass size={40} className="text-[var(--text-muted)] mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">No expeditions match your criteria</h3>
+              <p className="text-sm text-[var(--text-muted)] mb-6">
+                Try searching for a different region, or clear your filters to explore everything.
+              </p>
+              <button type="button" onClick={resetAllFilters} className="btn btn--primary text-xs uppercase px-6 py-2.5 rounded-lg">
+                View All Expeditions
+              </button>
+            </div>
+          ) : (
+            <div className="catalog-card-grid">
+              {filteredCatalog.slice(0, visibleCount).map((item) => {
+                const favorited = isFavorite(item.id);
+                return (
+                  <div key={item.id} className="card--poster flex flex-col group relative overflow-hidden rounded-xl border border-white/10 bg-[#071026] transition-all hover:-translate-y-1.5 hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-950/30">
+                    {/* Media Container with Fixed 16:10 Aspect Ratio */}
+                    <div className="relative w-full aspect-[16/10] overflow-hidden bg-black">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#071026] via-transparent to-transparent opacity-80" />
 
-                      {/* Top Wishlist and Badges */}
-                      <div className="card__top-meta flex items-center justify-between">
-                        <div className="flex gap-1.5 flex-wrap">
-                          <span className="label label--accent">{item.type}</span>
-                          {item.difficulty && <span className="label">{item.difficulty}</span>}
-                          <span className="label flex items-center gap-1">
-                            <Clock size={10} strokeWidth={2} /> {item.duration}
-                          </span>
-                        </div>
-
+                      {/* Top Badges */}
+                      <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-10">
+                        <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md text-cyan-400 border border-cyan-500/30">
+                          {item.type}
+                        </span>
                         <button
                           type="button"
-                          onClick={(e) => handleWishlistToggle(e, item.id)}
-                          className={`card-wishlist-btn ${saved ? 'card-wishlist-btn--active text-red-500 fill-red-500' : ''}`}
-                          aria-label={saved ? 'Remove from wishlist' : 'Save to wishlist'}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleFavorite(item.id);
+                          }}
+                          className={`card-wishlist-btn !top-0 !right-0 ${favorited ? 'card-wishlist-btn--active' : ''}`}
+                          aria-label={favorited ? 'Remove favorite' : 'Add favorite'}
                         >
-                          <Heart size={16} className={saved ? 'fill-red-500' : ''} />
+                          <Heart size={15} className={favorited ? 'fill-red-500 text-red-500' : ''} />
                         </button>
                       </div>
 
-                      {/* Card Content */}
-                      <div className="card__content">
-                        <div className="flex items-center justify-between text-xs mb-1.5">
-                          <span className="text-[var(--text-muted)] flex items-center gap-1">
-                            <MapPin size={12} strokeWidth={2} className="text-[var(--color-accent)]" />
-                            {item.location}
+                      {/* Category Label */}
+                      <div className="absolute bottom-3 left-3 z-10">
+                        <span className="text-[11px] font-semibold text-white/90 bg-white/10 backdrop-blur-md px-2 py-0.5 rounded border border-white/10">
+                          {item.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Card Body */}
+                    <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-white/60 mb-1.5">
+                          <span className="flex items-center gap-1 font-medium text-cyan-400">
+                            <MapPin size={11} /> {item.location}
                           </span>
-                          <span className="text-amber-400 flex items-center gap-1 font-semibold">
-                            <Star size={12} className="fill-amber-400" /> {item.rating}
+                          <span className="flex items-center gap-1 text-amber-400 font-semibold">
+                            <Star size={11} className="fill-amber-400" /> {item.rating} ({item.reviews})
                           </span>
                         </div>
 
-                        <h3 className="card__title text-xl md:text-2xl mb-1.5">{item.name}</h3>
-                        <p className="text-xs text-[var(--text-secondary)] line-clamp-2 mb-3">
+                        <h4 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
+                          <Link href={item.href}>{item.name}</Link>
+                        </h4>
+
+                        <p className="text-xs text-white/70 line-clamp-2 leading-relaxed mb-4">
                           {item.description}
                         </p>
+                      </div>
 
-                        <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                          <div>
-                            <span className="text-[10px] text-[var(--text-muted)] block uppercase font-medium">Pricing</span>
-                            <span className="text-sm font-bold text-[var(--color-accent)]">{item.price}</span>
-                          </div>
+                      {/* Footer Info & Actions */}
+                      <div className="pt-3 border-t border-white/10 flex items-center justify-between mt-auto">
+                        <div>
+                          <span className="text-[10px] text-white/50 uppercase tracking-wider block">Price</span>
+                          <span className="text-base font-bold text-white font-mono">{item.price}</span>
+                        </div>
 
-                          <div className="flex items-center gap-2">
-                            {item.type !== 'Destination' && (
-                              <button
-                                type="button"
-                                onClick={(e) => handleAddToTrip(e, item)}
-                                className="btn btn--secondary btn--sm px-2.5 py-1.5 rounded text-xs flex items-center gap-1"
-                                title="Add to Trip Builder"
-                              >
-                                {isAdded ? <Check size={11} className="text-emerald-400" /> : <Plus size={11} />}
-                                <span>{isAdded ? 'Added' : 'Trip'}</span>
-                              </button>
-                            )}
-                            <Link href={item.href} className="btn btn--primary btn--sm px-3 py-1.5 rounded text-xs flex items-center gap-1">
-                              <span>Details</span>
-                              <ArrowRight size={11} strokeWidth={2} />
-                            </Link>
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleAddTrip(item)}
+                            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/80 hover:text-white hover:bg-white/15 transition-all"
+                            title="Add to Trip Plan"
+                            aria-label="Add to Trip Plan"
+                          >
+                            <Plus size={15} />
+                          </button>
+                          <Link
+                            href={item.href}
+                            className="px-3.5 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-semibold hover:bg-cyan-500 hover:text-black transition-all flex items-center gap-1"
+                          >
+                            <span>Explore</span>
+                            <ArrowRight size={12} />
+                          </Link>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
-              {/* Load More Button */}
-              {visibleCount < filteredItems.length && (
-                <div className="text-center mt-12">
-                  <button
-                    type="button"
-                    onClick={() => setVisibleCount((prev) => prev + 6)}
-                    className="btn btn--secondary btn--lg px-8 py-3.5 rounded-xl inline-flex items-center gap-2"
-                  >
-                    <span>Load More Experiences ({filteredItems.length - visibleCount} remaining)</span>
-                    <ArrowRight size={16} strokeWidth={2} />
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            /* Empty State */
-            <div className="text-center py-16 px-4 rounded-2xl bg-black/30 border border-white/10 max-w-lg mx-auto">
-              <div className="w-16 h-16 rounded-full bg-[var(--color-accent-dim)] border border-[var(--color-accent)]/30 mx-auto flex items-center justify-center text-[var(--color-accent)] mb-4">
-                <Compass size={28} strokeWidth={1.8} />
-              </div>
-              <h3 className="text-xl font-bold uppercase text-white mb-2">No Matching Expeditions Found</h3>
-              <p className="text-sm text-[var(--text-secondary)] mb-6">
-                We couldn't find any experiences matching your current filter combination. Try broadening your criteria or resetting filters.
-              </p>
+          {/* Load More Button */}
+          {visibleCount < filteredCatalog.length && (
+            <div className="text-center mt-12">
               <button
                 type="button"
-                onClick={resetFilters}
-                className="btn btn--primary px-6 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-2"
+                onClick={() => setVisibleCount((prev) => prev + 6)}
+                className="btn btn--secondary text-xs uppercase px-8 py-3 rounded-full hover:border-cyan-400"
               >
-                <RotateCcw size={14} />
-                <span>Reset All Filters</span>
+                Load More Expeditions ({filteredCatalog.length - visibleCount} Remaining)
               </button>
             </div>
           )}
         </div>
       </section>
 
-      {/* ── SECTION G: JOURNEY PLANNER CTA ── */}
-      <section className="section py-12">
-        <div className="container px-4">
-          <div className="p-8 md:p-12 rounded-2xl bg-gradient-to-r from-[var(--bg-secondary)] via-[var(--bg-deep)] to-[var(--bg-primary)] border border-[var(--border-color)] text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-radial-at-c from-[var(--color-accent)]/10 to-transparent pointer-events-none" />
-            
-            <div className="relative z-10 max-w-2xl mx-auto">
-              <span className="badge mb-3">Custom Route Architect</span>
-              <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-wide text-white mb-4">
-                Design Your Tailored Indian Journey
-              </h2>
-              <p className="text-[var(--text-secondary)] text-sm md:text-base leading-relaxed mb-8">
-                Combine high-altitude treks, white-water rapids, and serene heritage retreats into a seamless, day-by-day expedition with live budget and transit calculation.
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                <Link href="/trip-builder" className="btn btn--primary btn--lg px-8 py-3.5 inline-flex items-center gap-2">
-                  <span>Launch Trip Builder</span>
-                  <ArrowRight size={16} strokeWidth={2} />
-                </Link>
-                <Link href="/itinerary" className="btn btn--secondary btn--lg px-8 py-3.5 inline-flex items-center gap-2">
-                  <span>View Sample Itineraries</span>
-                </Link>
-              </div>
-            </div>
+      {/* ── SECTION 4: TRIP BUILDER CTA ── */}
+      <section className="container px-4 mt-12">
+        <div className="p-8 md:p-12 rounded-2xl bg-gradient-to-r from-blue-950/70 via-slate-900/80 to-cyan-950/70 border border-cyan-500/30 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl shadow-cyan-950/40">
+          <div className="max-w-xl text-center md:text-left">
+            <span className="text-xs uppercase font-bold tracking-widest text-cyan-400 block mb-2">
+              Autonomous Trip Architect
+            </span>
+            <h3 className="font-display text-3xl md:text-5xl text-white mb-3">
+              CRAFT YOUR TAILORED EXPEDITION
+            </h3>
+            <p className="text-sm text-white/70 leading-relaxed">
+              Mix and match high-altitude treks, white-water runs, and boutique mountain retreats. Generate ready-to-book itineraries in seconds.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 shrink-0">
+            <Link href="/trip-builder" className="btn btn--primary text-xs uppercase px-7 py-3 rounded-xl flex items-center justify-center gap-2">
+              <span>Start Trip Builder</span>
+              <ArrowRight size={14} />
+            </Link>
+            <Link href="/itinerary" className="btn btn--secondary text-xs uppercase px-7 py-3 rounded-xl flex items-center justify-center gap-2">
+              <span>View Itineraries</span>
+            </Link>
           </div>
         </div>
       </section>
@@ -1240,10 +838,10 @@ function ExploreContent() {
 export default function ExplorePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen pt-32 pb-20 flex items-center justify-center text-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs uppercase tracking-widest text-[var(--text-muted)] font-semibold">Loading Explore Experiences...</p>
+      <div className="min-h-screen bg-[#010611] flex items-center justify-center text-white">
+        <div className="flex items-center gap-3">
+          <Compass className="animate-spin text-[var(--color-accent)]" size={24} />
+          <span className="text-sm font-semibold tracking-wider uppercase">Loading Explorer Wall...</span>
         </div>
       </div>
     }>
