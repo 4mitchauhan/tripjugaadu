@@ -4,10 +4,9 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 const TOTAL_FRAMES = 150;
 const LERP_FACTOR = 0.18;
-const INITIAL_PRIORITY_FRAMES = 15;
-const MAX_CACHED_FRAMES = 150;
-const NEARBY_WINDOW = 10;
-const KEYFRAME_STRIDE = 5;
+const MAX_CACHED_FRAMES = 45;
+const NEARBY_WINDOW = 8;
+const KEYFRAME_STRIDE = 10;
 
 export default function CinematicHeroCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -188,15 +187,7 @@ export default function CinematicHeroCanvas() {
       img.decoding = 'async';
       img.src = getFramePath(clampedIndex);
 
-      img.onload = async () => {
-        if (typeof img.decode === 'function') {
-          try {
-            await img.decode();
-          } catch {
-            // Already loaded, keep as usable
-          }
-        }
-
+      img.onload = () => {
         if (isComponentMountedRef.current) {
           imagesCacheRef.current.set(clampedIndex, img);
           failedFramesRef.current.delete(clampedIndex);
@@ -268,7 +259,7 @@ export default function CinematicHeroCanvas() {
 
     updateScrollProgress();
 
-    // 1. Immediately preload and draw frame 0 (frame_001.jpg)
+    // 1. Immediately preload and draw ONLY frame 0 (frame_001.jpg) for instantaneous hero rendering
     loadFrame(0).then((img) => {
       if (img && isComponentMountedRef.current) {
         setIsFirstFrameLoaded(true);
@@ -279,37 +270,72 @@ export default function CinematicHeroCanvas() {
       }
     });
 
-    // 2. Progressive background preload strategy
-    const startProgressivePreload = async () => {
-      // Step A: Priority start window (first 12 frames)
-      const initial = Array.from({ length: INITIAL_PRIORITY_FRAMES }, (_, idx) => idx);
-      await Promise.all(initial.map((idx) => loadFrame(idx)));
+    // 2. Idle-scheduled progressive background preload strategy
+    let idleTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    let idleCallbackId: number | null = null;
 
-      if (!isComponentMountedRef.current) return;
+    const schedulePreload = () => {
+      if (prefersReducedMotionRef.current) return;
 
-      // Step B: Keyframe stride (every 10th frame: 10, 20, 30 ... 149)
-      const keyframes: number[] = [];
-      for (let k = KEYFRAME_STRIDE; k < TOTAL_FRAMES; k += KEYFRAME_STRIDE) {
-        keyframes.push(k);
-      }
-      keyframes.push(TOTAL_FRAMES - 1); // ensure frame 149 is in keyframes
-      await Promise.all(keyframes.map((idx) => loadFrame(idx)));
-
-      if (!isComponentMountedRef.current) return;
-
-      // Step C: Progressive filling in chunks of 8 frames
-      for (let start = 0; start < TOTAL_FRAMES; start += 8) {
+      const runIdleTask = async () => {
         if (!isComponentMountedRef.current) return;
-        const chunk = Array.from(
-          { length: Math.min(8, TOTAL_FRAMES - start) },
-          (_, offset) => start + offset
-        );
-        await Promise.all(chunk.map((idx) => loadFrame(idx)));
+
+        // Step A: Immediate forward buffer (frames 1 and 2)
+        await Promise.all([1, 2].map((idx) => loadFrame(idx)));
+        if (!isComponentMountedRef.current) return;
+
+        // Step B: Keyframe stride (every 10th frame: 10, 20, 30 ... 149)
+        const keyframes: number[] = [];
+        for (let k = KEYFRAME_STRIDE; k < TOTAL_FRAMES; k += KEYFRAME_STRIDE) {
+          keyframes.push(k);
+        }
+        keyframes.push(TOTAL_FRAMES - 1);
+
+        for (const k of keyframes) {
+          if (!isComponentMountedRef.current) return;
+          await loadFrame(k);
+        }
+
+        if (!isComponentMountedRef.current) return;
+
+        // Step C: Progressive filling in low-priority chunks of 6 frames with UI yields
+        for (let start = 0; start < TOTAL_FRAMES; start += 6) {
+          if (!isComponentMountedRef.current) return;
+          const chunk = Array.from(
+            { length: Math.min(6, TOTAL_FRAMES - start) },
+            (_, offset) => start + offset
+          ).filter((idx) => !imagesCacheRef.current.has(idx));
+
+          if (chunk.length > 0) {
+            await Promise.all(chunk.map((idx) => loadFrame(idx)));
+            await new Promise((r) => setTimeout(r, 40));
+          }
+        }
+      };
+
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        idleCallbackId = (window as any).requestIdleCallback(() => runIdleTask(), { timeout: 2500 });
+      } else {
+        idleTimeoutId = setTimeout(runIdleTask, 1200);
       }
     };
 
-    // Always start progressive preload so assets are ready on scroll
-    startProgressivePreload();
+    // If user starts scrolling before idle callback triggers, preload nearby window
+    const onFirstScroll = () => {
+      if (window.scrollY > 5) {
+        window.removeEventListener('scroll', onFirstScroll);
+        const cur = Math.round(currentFrameRef.current);
+        for (let i = 1; i <= 6; i++) {
+          const idx = cur + i;
+          if (idx < TOTAL_FRAMES) {
+            loadFrame(idx);
+          }
+        }
+      }
+    };
+    window.addEventListener('scroll', onFirstScroll, { passive: true });
+
+    schedulePreload();
 
     // 3. Render loop with lerp and visibility pausing
     const renderLoop = () => {
@@ -362,8 +388,14 @@ export default function CinematicHeroCanvas() {
       motionQuery.removeEventListener('change', handleMotionChange);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', updateScrollProgress);
+      window.removeEventListener('scroll', onFirstScroll);
       document.removeEventListener('visibilitychange', handleVisibility);
       observer.disconnect();
+
+      if (idleTimeoutId) clearTimeout(idleTimeoutId);
+      if (idleCallbackId && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        (window as any).cancelIdleCallback(idleCallbackId);
+      }
 
       if (animationFrameIdRef.current) {
         cancelAnimationFrame(animationFrameIdRef.current);

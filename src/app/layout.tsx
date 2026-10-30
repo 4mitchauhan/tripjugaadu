@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Bebas_Neue, Inter } from "next/font/google";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import PageEffects from "@/components/PageEffects";
@@ -6,6 +7,19 @@ import OfflineExpeditionBanner from "@/components/OfflineExpeditionBanner";
 import { LocaleProvider } from "@/context/LocaleContext";
 import { TripProvider } from "@/context/TripContext";
 import "./globals.css";
+
+const bebasNeue = Bebas_Neue({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-bebas",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "TripJugaadu — Travel Smarter. Explore Deeper.",
@@ -19,14 +33,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased scroll-smooth" data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`h-full antialiased scroll-smooth ${bebasNeue.variable} ${inter.variable}`}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content="#010611" />
