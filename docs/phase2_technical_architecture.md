@@ -380,10 +380,6 @@ Idempotency keys on Webhooks to prevent duplicate processing of the same payment
 - **V1**: Multiple API instances behind load balancer, Redis caching for heavy queries.
 - **FUTURE**: Read-replicas for Postgres, Elasticsearch for complex search, extraction of Commerce/Inventory into microservices.
 
-## 49. Future AI Architecture
-AI is an orchestration layer, NOT a source of truth.
-Future implementation: User asks AI for a trip. AI queries TripJugaadu standard REST APIs to get actual pricing/availability, then formats the response. AI cannot bypass business rules.
-
 ## 50. Future Microservice Boundaries
 Clear seams exist for extraction:
 - `Search Service`: Once full-text SQL is too slow.
@@ -434,7 +430,7 @@ tripjugaadu/
 ## 56. MVP / V1 / FUTURE Classification
 - **MVP**: Monolith, Postgres search, basic Trip Builder, Razorpay payments, standard email auth.
 - **V1**: Advanced filtering, OAuth (Google/Apple), automated refunds.
-- **FUTURE**: AI Assistant, Microservices, Elasticsearch, Global payment gateways.
+- **FUTURE**: Microservices, Elasticsearch, Global payment gateways.
 
 ## 57. Phase 3 Handoff
 Phase 3 Engineering Checklist:

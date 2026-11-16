@@ -359,11 +359,6 @@ Transactions are **REQUIRED** for:
 - **V1**: Horizontal scaling of API, Redis caching for catalog.
 - **FUTURE**: Read-replicas, microservices for Commerce.
 
-## 49. Future AI Architecture
-- AI serves as an orchestration/query layer.
-- Architecture: User -> AI -> TripJugaadu API -> AI Formats Response.
-- *Rule: AI is never authoritative for price, availability, or booking status.*
-
 ## 50. Future Microservice Boundaries
 - `Commerce Service` (Booking, Payments).
 - `Inventory Service` (Providers, Listings, Availability).
@@ -413,7 +408,7 @@ tripjugaadu/
 ## 56. MVP / V1 / FUTURE Classification
 - **MVP**: Monolith, PG Search, Razorpay, Email Auth, Trip Builder.
 - **V1**: OAuth, advanced caching, automated refunds.
-- **FUTURE**: AI assistance, Microservices, global gateways.
+- **FUTURE**: Microservices, global gateways.
 
 ## 57. Phase 3 Handoff
 **Phase 3 Implementation Checklist:**

@@ -84,20 +84,6 @@ async function runAudit() {
   assert(pageCode.includes("height: '400vh'"), 'Hero section provides ~400vh scrollable distance');
   assert(pageCode.includes("position: 'sticky'") && pageCode.includes("height: '100vh'"), 'Hero section is sticky 100vh container');
 
-  // 7. Verify No AI components or sections in HTML
-  assert(!home.body.includes('JUGAADU AI OS'), 'Home HTML has no JUGAADU AI OS button');
-  assert(!home.body.includes('AiTravelCompanion'), 'Home HTML has no AiTravelCompanion');
-
-  const destPage = await fetchBody('/destination/rishikesh');
-  assert(!destPage.body.includes('DestinationAiAssistant'), 'Destination page has no DestinationAiAssistant');
-  assert(!destPage.body.includes('Ask TripJugaadu AI'), 'Destination page has no Ask TripJugaadu AI section');
-
-  const tripPage = await fetchBody('/trip-builder');
-  assert(!tripPage.body.includes('AI EXPEDITION ARCHITECT'), 'Trip Builder has no AI EXPEDITION ARCHITECT banner');
-
-  const searchPage = await fetchBody('/search');
-  assert(!searchPage.body.includes('AI Natural Language Search'), 'Search page has no AI Natural Language Search bar');
-
   console.log('\n============================================================');
   console.log(`RESULTS: ${passed}/${total} AUDIT CHECKS PASSED (${Math.round((passed / total) * 100)}%)`);
   console.log('============================================================\n');

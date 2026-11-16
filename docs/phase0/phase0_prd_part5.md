@@ -397,10 +397,6 @@ Provider Registration
 
 | Feature | Description |
 |---|---|
-| AI Trip Planner | AI-generated itinerary suggestions based on preferences |
-| AI Packing Assistant | Personalized packing recommendations |
-| Conversational Travel Q&A | Chat-based interface for destination questions |
-| Personalized Recommendations | ML-powered recommendations based on user behavior |
 | Collaborative Trip Planning | Multiple users edit the same trip plan |
 | Social Features | Trip sharing, travel stories, community |
 | Mobile App (Traveler) | Native mobile application for travelers |
@@ -434,7 +430,6 @@ TripJugaadu is a travel marketplace that helps travelers discover destinations, 
 | A social media platform for travelers | Social features are future, not core |
 | A VR/3D destination explorer | 3D is for UI depth, not virtual tourism |
 | A flight/train booking platform | Transport is future; we focus on destination experiences |
-| An AI travel assistant | AI is future; MVP is structured information |
 | A clone of MakeMyTrip/Booking.com | We compete on depth and preparation, not inventory breadth |
 
 ---
@@ -453,7 +448,6 @@ TripJugaadu is a travel marketplace that helps travelers discover destinations, 
 | 8 | Payment system: Razorpay | **CONFIRMED** | Best option for Indian payment methods | Transaction processing |
 | 9 | Booking model: Instant booking (MVP), Request-based (V1) | **RECOMMENDED** | Instant-only reduces MVP complexity. Request-based important for weather-dependent activities. | Booking flow design |
 | 10 | Revenue model: Commission on bookings (primary) | **RECOMMENDED** | Standard marketplace model. Exact rate TBD. | Business sustainability |
-| 11 | AI scope: NONE in MVP. Conceptual requirements defined for future. | **CONFIRMED** | AI adds significant complexity with uncertain value at MVP stage | Prevents scope creep |
 | 12 | Authentication: NextAuth.js (Auth.js) | **RECOMMENDED** | Native Next.js integration, free, supports required auth methods | Auth architecture |
 | 13 | Deployment: Vercel (frontend) + Railway/Render (backend) | **RECOMMENDED** | Low cost, easy deployment, suitable for MVP | Infrastructure |
 | 14 | Image storage: Cloudinary | **RECOMMENDED** | Good free tier, optimization features, CDN | Media management |
@@ -614,7 +608,7 @@ Phase 1 focuses on **UX Architecture, Design System, and Visual Language**. It d
 | Booking flow matches marketplace definition | ✅ | Section 22 booking lifecycle aligns with Section 21 marketplace definition |
 | Business model matches booking flow | ✅ | Commission model (Section 25) applied at booking confirmation (Section 22) |
 | MVP scope is technically realistic | ✅ | Scope constrained to one destination, core features, small team |
-| Future features are NOT in MVP | ✅ | AI, mobile app, social, loyalty, flights, multi-destination clearly deferred |
+| Future features are NOT in MVP | ✅ | Mobile app, social, loyalty, flights, multi-destination clearly deferred |
 | Performance requirements address visual effects | ✅ | Section 33 defines budgets, fallbacks, progressive enhancement for all visual layers |
 | SEO requirements cover all public pages | ✅ | Section 34 addresses all public page types |
 | Edge cases cover critical failure paths | ✅ | Section 36 covers 28 edge cases including payment-booking mismatch |

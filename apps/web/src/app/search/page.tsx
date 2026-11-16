@@ -11,7 +11,6 @@ export default function SearchPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string[]>([]);
   const [minRating, setMinRating] = useState<number>(0);
   const [sortBy, setSortBy] = useState<string>('relevant');
-  const [aiParsedIntent, setAiParsedIntent] = useState<any>(null);
 
   // Build unified item pool
   const allItems = [
@@ -150,71 +149,11 @@ export default function SearchPage() {
           <button
             onClick={() => {
               setSearchTerm('');
-              setAiParsedIntent(null);
             }}
             className="label label--accent cursor-pointer hover:underline"
           >
             Clear Search
           </button>
-        </div>
-
-        {/* AI Intent Discovery Bar */}
-        <div style={{ marginBottom: 'var(--space-6)', padding: 'var(--space-3) var(--space-4)', background: 'rgba(0, 174, 239, 0.05)', border: '1px solid rgba(0, 174, 239, 0.2)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-accent)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              ⚡ AI Natural Language Search:
-            </span>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              {[
-                'Adventurous weekend near Delhi under 15000',
-                'Riverside camping in Rishikesh',
-                'Moderate treks in Himachal for 3 days',
-              ].map((querySample, idx) => (
-                <button
-                  key={idx}
-                  onClick={async () => {
-                    setSearchTerm(querySample);
-                    try {
-                      const res = await fetch('http://localhost:4000/api/v1/ai/search', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ query: querySample }),
-                      });
-                      if (res.ok) {
-                        const json = await res.json();
-                        setAiParsedIntent(json.parsedIntent);
-                        if (json.parsedIntent.destination) {
-                          setSearchTerm(json.parsedIntent.destination);
-                        }
-                        if (json.parsedIntent.budgetMax) {
-                          setMaxPrice(json.parsedIntent.budgetMax);
-                        }
-                      }
-                    } catch {
-                      setSearchTerm('Rishikesh');
-                    }
-                  }}
-                  style={{
-                    fontSize: '11px',
-                    padding: '3px 8px',
-                    background: 'rgba(7, 27, 58, 0.6)',
-                    border: '1px solid rgba(0, 174, 239, 0.3)',
-                    borderRadius: '9999px',
-                    color: '#fff',
-                    cursor: 'pointer',
-                  }}
-                >
-                  "{querySample}"
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {aiParsedIntent && (
-            <div style={{ fontSize: '11px', color: '#39ff14', background: 'rgba(57, 255, 20, 0.1)', padding: '2px 8px', borderRadius: '4px' }}>
-              ✓ Parsed: {aiParsedIntent.destination} • Max ₹{aiParsedIntent.budgetMax?.toLocaleString()} • {aiParsedIntent.durationDays} Days
-            </div>
-          )}
         </div>
 
         <div className="search-results">

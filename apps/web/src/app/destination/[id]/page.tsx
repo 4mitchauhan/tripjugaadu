@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DESTINATIONS, ADVENTURES, STAYS, KBYG_ITEMS } from '@/lib/data';
-import DestinationAiAssistant from '@/components/DestinationAiAssistant';
 
 export function generateStaticParams() {
   return DESTINATIONS.map((d) => ({
@@ -158,9 +157,6 @@ export default async function DestinationDetailPage({
           </div>
         </div>
       </section>
-
-      {/* Contextual AI Destination Assistant */}
-      <DestinationAiAssistant destinationName={dest.name} destinationSlug={dest.id} />
 
       {/* Bottom CTA */}
       <section className="section bg-gradient-to-r from-[var(--bg-secondary)] to-[var(--bg-deep)] text-center">

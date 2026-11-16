@@ -1,6 +1,6 @@
 # TripJugaadu (ट्रिप जुगाड़ू)
 
-> **India's Autonomous High-Altitude Adventure & Experiential Travel Ecosystem**
+> **India's High-Altitude Adventure & Experiential Travel Ecosystem**
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.4.3-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.3.0-blue?style=for-the-badge&logo=react)](https://react.dev/)
@@ -12,7 +12,7 @@
 
 ---
 
-TripJugaadu is an enterprise-grade travel and adventure marketplace engineered specifically for the rugged geography of the Indian subcontinent (Uttarakhand, Himachal Pradesh, Ladakh, Meghalaya, Spiti Valley, and beyond). It unifies high-altitude expedition safety protocols, wilderness eco-stays, verified operator onboarding, autonomous AI trip planning, tamper-proof Razorpay payment processing, and a balanced double-entry financial ledger under a high-performance monorepo architecture.
+TripJugaadu is an enterprise-grade travel and adventure marketplace engineered specifically for the rugged geography of the Indian subcontinent (Uttarakhand, Himachal Pradesh, Ladakh, Meghalaya, Spiti Valley, and beyond). It unifies high-altitude expedition safety protocols, wilderness eco-stays, verified operator onboarding, tamper-proof Razorpay payment processing, and a balanced double-entry financial ledger under a high-performance monorepo architecture.
 
 ---
 
@@ -25,7 +25,6 @@ TripJugaadu is an enterprise-grade travel and adventure marketplace engineered s
    - [Phase 2 — Cinematic 150-Frame Hero Engine & Three.js Visualizer](#phase-2--cinematic-150-frame-hero-engine--threejs-visualizer)
    - [Phase 3 — Core Travel Marketplace & High-Altitude Catalog](#phase-3--core-travel-marketplace--high-altitude-catalog)
    - [Phase 4 — Operator Portal, Admin Governance & Razorpay Checkout](#phase-4--operator-portal-admin-governance--razorpay-checkout)
-   - [Phase 5 — Autonomous AI Travel Intelligence (Gemini + Deterministic Fallback)](#phase-5--autonomous-ai-travel-intelligence-gemini--deterministic-fallback)
    - [Phase 6 — Global FinTech, Multi-Currency, B2B Gateway & Sentinel Telemetry](#phase-6--global-fintech-multi-currency-b2b-gateway--sentinel-telemetry)
    - [Phase 7 — Interactive Audit Resolution (27 Defects Resolved, 0 Regression)](#phase-7--interactive-audit-resolution-27-defects-resolved-0-regression)
    - [Phase 8 — Security & Payment Integrity Hardening](#phase-8--security--payment-integrity-hardening)
@@ -45,11 +44,10 @@ TripJugaadu is an enterprise-grade travel and adventure marketplace engineered s
 - **Next.js 16 (Turbopack & App Router) + React 19:** Full SSR, SSG, and client hydration across **35 production routes** with zero TypeScript errors (`npx tsc --noEmit` clean).
 - **Cinematic 150-Frame Hero Canvas Engine:** Scroll-linked canvas animation rendering 150 calibrated high-definition frames with linear interpolation (`lerp`), Retina/DPR scaling, aspect-ratio cover math, and nearest-loaded-frame fallback.
 - **Three.js 3D Mountain Visualizers:** Dynamic WebGL mountain terrain, weather shaders, and expedition preview scenes with SSR-safe fallbacks.
-- **Microservice-Ready NestJS 12 API:** 18 domain modules covering bookings, payments, auth, finance, AI, telemetry, operators, and B2B partners.
+- **Microservice-Ready NestJS 12 API:** 17 domain modules covering bookings, payments, auth, finance, telemetry, operators, and B2B partners.
 - **Enterprise Double-Entry Ledger:** Immutable debit/credit records with automated T+1 IMPS/NEFT bank payouts and tiered platform commissions (5% Expeditions, 8% Stays, 7% Cultural Experiences).
 - **Tamper-Proof Razorpay Checkout:** Server-authoritative price calculation (rejecting client-tampered totals), HMAC-SHA256 signature verification, webhook idempotency, and double-spend prevention.
 - **Cryptographic Security Layer:** Salted `scrypt` password hashing, timing-safe equality checks, HMAC-SHA256 JWT tokens, `AuthGuard` & `RolesGuard` RBAC, and boot-time environment validation.
-- **Autonomous AI Travel Intelligence (L1–L5):** Multi-model engine with Google Gemini (Flash 1.5, 2.0, 3.1) and deterministic mock fallback; natural language search, IMF-grounded destination safety Q&A, and L4/L5 autonomous execution with OTP guardrails.
 - **Offline-First Expedition Mode:** PWA Service Worker + IndexedDB cache preserving mountain trail guides, emergency contacts, and booking vouchers when cellular signal drops.
 - **Global Localization Layer:** Dynamic multi-currency conversion (`INR`, `USD`, `EUR`, `GBP`, `AED`) and trilingual dictionary (English, Hindi, Hinglish).
 
@@ -73,10 +71,6 @@ tripjugaadu/
 │   │   │   ├── modules/
 │   │   │   │   ├── admin/             # Platform KPI dashboard, KYC & audit logs
 │   │   │   │   ├── adventures/        # Adventure batches, slots & gear checks
-│   │   │   │   ├── ai/                # Gemini & Mock AI, search, destination Q&A, L4/L5
-│   │   │   │   │   ├── providers/     # GeminiAiProvider, MockAiProvider
-│   │   │   │   │   ├── ai-guardrails.service.ts
-│   │   │   │   │   └── ai-tools.service.ts
 │   │   │   │   ├── auth/              # JWT auth, user/provider signup, getMe
 │   │   │   │   ├── bookings/          # Reservation lifecycle, IDOR defense & check-in
 │   │   │   │   ├── collaboration/     # Group trip members & pooled bill-splitting
@@ -114,7 +108,6 @@ tripjugaadu/
 │   ├── components/                    # Reusable React 19 UI components
 │   │   ├── 3d/                        # Three.js WebGL mountain & adventure scenes
 │   │   ├── CinematicHeroCanvas.tsx    # High-performance 150-frame canvas renderer
-│   │   ├── DestinationAiAssistant.tsx # Destination-level Q&A widget
 │   │   ├── Footer.tsx                 # Enterprise footer with internal routing
 │   │   ├── KbygIcon.tsx               # Know Before You Go visual badges
 │   │   ├── Navigation.tsx             # Responsive navbar with currency/locale & login
@@ -173,16 +166,6 @@ tripjugaadu/
   - Server-side booking creation (`POST /api/v1/bookings`) in `PAYMENT_PENDING` state.
   - Authoritative Razorpay order creation (`POST /api/v1/payments/create-order`).
   - Authoritative coupon validation (`POST /api/v1/coupons/validate`) with coupon removal support.
-
-### Phase 5 — Autonomous AI Travel Intelligence (Gemini + Deterministic Fallback)
-- **Multi-Model Provider Architecture:** `GeminiAiProvider` integrating Google Gemini (1.5 Flash, 2.0 Flash, 3.1 Flash-Lite) with timeout fallback to `MockAiProvider`.
-- **Natural Language Search (`POST /api/v1/ai/search`):** Extracts destination, budget thresholds, and activity intent from natural queries (e.g., *"Rafting under 5000 in Rishikesh"*).
-- **AI Travel Companion (`POST /api/v1/ai/chat`):** Grounded conversational agent answering travel inquiries with real-time inventory suggestions.
-- **Destination Safety Q&A (`POST /api/v1/ai/destination-qa`):** Verifies queries against official Indian Mountaineering Foundation (IMF) safety standards.
-- **AI Expedition Planner (`POST /api/v1/ai/plan-trip`):** Synthesizes multi-day itineraries with morning, afternoon, and evening slots matched to real marketplace inventory.
-- **Autonomous Workflows (L1–L5):**
-  - **L4:** 15-minute provisional inventory hold token.
-  - **L5 (Guardrail):** Enforces human-in-the-loop explicit OTP confirmation token before financial commitment.
 
 ### Phase 6 — Global FinTech, Multi-Currency, B2B Gateway & Sentinel Telemetry
 - **Global Currency Engine:** Real-time exchange rate conversions supporting `INR (₹)`, `USD ($)`, `EUR (€)`, `GBP (£)`, and `AED`.
@@ -251,7 +234,7 @@ All 27 QA defects across 41 interactive controls were audited and resolved with 
 | `/experiences` | Static (○) | Curated cultural tours and workshops catalog |
 | `/experience/[id]` | Dynamic (ƒ) | Guided experience detail with guest count selection and trip builder integration |
 | `/destinations` | Static (○) | Curated destinations grid with region cards |
-| `/destination/[id]` | SSG (●) | Destination guide with weather, best season, altitude, and AI assistant (pre-rendered for 6 destinations) |
+| `/destination/[id]` | SSG (●) | Destination guide with weather, best season, and altitude (pre-rendered for 6 destinations) |
 | `/trip-builder` | Static (○) | Multi-day trip planner with interactive calendar, budget tracker, and collaborator invites |
 | `/itinerary` | Static (○) | Dynamically rendered expedition itinerary matching user's draft trip configuration |
 | `/booking` | Static (○) | Traveler checkout with native validation, coupon engine, and Razorpay integration |
@@ -321,15 +304,6 @@ All API endpoints are prefixed with `/api/v1` and proxied through Next.js rewrit
 - `GET /api/v1/finance/payouts` — Provider bank payout queue
 - `POST /api/v1/finance/payouts/:id/settle` — Execute IMPS/NEFT settlement
 - `GET /api/v1/finance/commissions` — Active commission tier breakdown
-
-### 6. Autonomous AI Intelligence
-- `POST /api/v1/ai/search` — Natural language intent and budget parser
-- `POST /api/v1/ai/chat` — Conversational companion grounded in catalog
-- `POST /api/v1/ai/destination-qa` — IMF-grounded destination safety Q&A
-- `POST /api/v1/ai/plan-trip` — Multi-day automated itinerary generator
-- `POST /api/v1/ai/monitor` — Real-time weather, river discharge, and road alerts
-- `POST /api/v1/ai/multimodal` — Equipment readiness analysis
-- `POST /api/v1/ai/autonomous-workflow` — L4 provisional hold and L5 OTP execution
 
 ### 7. B2B Partner Gateway & Collaboration
 - `GET /api/v1/partner/catalog` — HMAC-authenticated B2B inventory feed
@@ -461,7 +435,6 @@ node scripts/verify_hero_animation.js
 # Verify cross-phase integration (Phases 0–6)
 node scripts/cross_phase_audit.js
 
-# Verify FinTech, multi-currency, AI companion, and B2B gateway
 node scripts/phase6_verification.js
 ```
 
@@ -510,8 +483,6 @@ PARTNER_SECRET_KEY="tj_live_ghuk_984128471204"
 RAZORPAY_KEY_ID="rzp_test_placeholder"
 RAZORPAY_KEY_SECRET="tripjugaadu_sec_key_2026"
 RAZORPAY_WEBHOOK_SECRET="rzp_wh_secret_tripjugaadu_2026"
-GEMINI_API_KEY=""
-GEMINI_MODEL="gemini-1.5-flash"
 ```
 
 ### 4. Run Development Servers
@@ -549,8 +520,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | `RAZORPAY_KEY_ID` | Razorpay Merchant Key ID | `rzp_test_placeholder` |
 | `RAZORPAY_KEY_SECRET` | Razorpay Merchant Secret for order creation & signatures | `tripjugaadu_sec_key_2026` |
 | `RAZORPAY_WEBHOOK_SECRET`| Razorpay Webhook Signing Secret | `rzp_wh_secret_tripjugaadu_2026` |
-| `GEMINI_API_KEY` | Google Gemini API key (optional; falls back to deterministic model) | `""` |
-| `GEMINI_MODEL` | Gemini AI model identifier | `gemini-1.5-flash` |
 
 ---
 
@@ -566,7 +535,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | **Icons** | Lucide React |
 | **Backend Framework** | NestJS 12.0.1 (Express adapter, modular architecture) |
 | **ORM & Database** | Prisma 6.19.3 with SQLite / PostgreSQL |
-| **AI Intelligence** | Google Gemini (1.5 Flash, 2.0 Flash) + Deterministic Mock Provider |
 | **Payment Gateway** | Razorpay (Server order creation & HMAC-SHA256 signature verification) |
 | **Security & Auth** | Scrypt password hashing, HMAC-SHA256 JWTs, AuthGuard, RolesGuard |
 | **Offline & PWA** | Custom Service Worker + IndexedDB + Web App Manifest |

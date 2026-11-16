@@ -508,9 +508,9 @@ These principles guide every product decision. When requirements conflict, these
 
 ### Principle 2 — Honest Information
 
-> The platform clearly labels the source and reliability of all information. Platform-curated content, provider-submitted information, user reviews, and AI-generated suggestions are visually and structurally distinct.
+> The platform clearly labels the source and reliability of all information. Platform-curated content, provider-submitted information, and user reviews are visually and structurally distinct.
 
-**Implication:** Build separate content attribution systems. Never present AI-generated text as verified fact.
+**Implication:** Build separate content attribution systems so users can identify where information came from.
 
 ### Principle 3 — Depth Over Breadth
 
@@ -580,7 +580,6 @@ These principles guide every product decision. When requirements conflict, these
 | Trip Cost Estimator | Aggregate estimated cost of all items in trip | MUST HAVE (MVP) |
 | Basic Itinerary | Day-wise itinerary view | MUST HAVE (MVP) |
 | Wishlist | Save destinations, activities, stays for later | MUST HAVE (MVP) |
-| Smart Itinerary Optimization | AI-suggested itinerary ordering | FUTURE |
 | Collaborative Trip Planning | Multiple users edit the same trip | FUTURE |
 
 #### Booking Features

@@ -630,14 +630,6 @@ export default function AdminConsolePage() {
                     </div>
 
                     <div style={{ padding: '12px', background: 'var(--bg-primary)', borderRadius: '6px' }}>
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>PLATFORM ENGINE</div>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#fff', marginTop: '4px' }}>
-                        {healthData.services?.aiInference?.provider}
-                      </div>
-                      <div style={{ fontSize: '10px', color: '#10b981' }}>{healthData.services?.aiInference?.guardrails}</div>
-                    </div>
-
-                    <div style={{ padding: '12px', background: 'var(--bg-primary)', borderRadius: '6px' }}>
                       <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>MEMORY METRICS</div>
                       <div style={{ fontSize: '13px', fontWeight: 600, color: '#fff', marginTop: '4px' }}>
                         Heap: {healthData.system?.heapUsedMb}MB / {healthData.system?.heapTotalMb}MB
@@ -663,10 +655,6 @@ export default function AdminConsolePage() {
                     <div style={{ padding: '10px', background: 'var(--bg-primary)', borderRadius: '6px' }}>
                       <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>99th PERCENTILE LATENCY</div>
                       <div style={{ fontSize: '16px', fontWeight: 700, color: '#eab308' }}>{metricsData.latency?.p99Ms} ms</div>
-                    </div>
-                    <div style={{ padding: '10px', background: 'var(--bg-primary)', borderRadius: '6px' }}>
-                      <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>DATA GROUNDING ACCURACY</div>
-                      <div style={{ fontSize: '16px', fontWeight: 700, color: '#39ff14' }}>{metricsData.aiGroundingAccuracyPct}%</div>
                     </div>
                   </div>
                 </div>

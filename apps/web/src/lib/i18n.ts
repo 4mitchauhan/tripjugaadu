@@ -45,7 +45,7 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'hero.badge': 'INDIA’S INTELLIGENT TRAVEL ECOSYSTEM',
     'hero.title_pre': 'TRAVEL SMARTER.',
     'hero.title_post': 'EXPLORE DEEPER.',
-    'hero.desc': 'Discover extraordinary destinations, high-altitude expeditions, and verified local operators through one autonomous travel platform.',
+    'hero.desc': 'Discover extraordinary destinations, high-altitude expeditions, and verified local operators through one travel platform.',
     'hero.cta_plan': 'Build Expedition',
     'hero.cta_explore': 'Discover Places',
     'hero.search_placeholder': 'Where do you want to explore? (e.g. White water rafting in Rishikesh)',
@@ -67,12 +67,6 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'label.difficulty': 'Difficulty',
     'label.duration': 'Duration',
     'label.readiness': 'Readiness Score',
-
-    // AI & Monitor
-    'ai.companion_title': 'TripJugaadu AI Architect',
-    'ai.voice_search': 'Voice Expedition Search',
-    'ai.monitoring_active': 'Sentinel Travel Monitor Active',
-    'ai.multimodal_gear': 'Smart Gear & Landmark Scanner',
   },
 
   hi: {
@@ -113,12 +107,6 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'label.difficulty': 'कठिनाई स्तर',
     'label.duration': 'अवधि',
     'label.readiness': 'तैयारी स्कोर',
-
-    // AI & Monitor
-    'ai.companion_title': 'ट्रिपजुगाड़ू एआई साथी',
-    'ai.voice_search': 'वॉइस यात्रा खोज',
-    'ai.monitoring_active': 'लाइव यात्रा निगरानी सक्रिय',
-    'ai.multimodal_gear': 'सामान व स्थल स्कैनर',
   },
 
   'hi-en': {
@@ -159,12 +147,6 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'label.difficulty': 'Difficulty Level',
     'label.duration': 'Duration',
     'label.readiness': 'Trip Readiness',
-
-    // AI & Monitor
-    'ai.companion_title': 'TripJugaadu AI Buddy',
-    'ai.voice_search': 'Voice Se Search Karo',
-    'ai.monitoring_active': 'Live Travel Monitor On Hai',
-    'ai.multimodal_gear': 'Gear Check Scanner',
   },
 };
 

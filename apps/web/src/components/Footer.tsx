@@ -14,7 +14,7 @@ export default function Footer() {
             <div className="footer__logo">TRIP<span>JUGAADU</span></div>
             <p className="footer__tagline">
               Travel smarter. Explore deeper.<br/>
-              India’s next-generation autonomous travel ecosystem and intelligent marketplace.
+              India’s next-generation travel ecosystem and marketplace.
             </p>
             <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#94a3b8' }}>
               <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></span>

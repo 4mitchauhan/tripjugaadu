@@ -21,11 +21,6 @@ export class ObservabilityService {
           status: isDbConnected ? 'CONNECTED' : 'IN_MEMORY_FALLBACK_ACTIVE',
           engine: isDbConnected ? 'PostgreSQL' : 'TripJugaadu High-Performance In-Memory Seed Store',
         },
-        aiInference: {
-          status: 'OPERATIONAL',
-          provider: 'Gemini 2.5 Flash / Fallback Native LLM',
-          guardrails: 'ACTIVE_ZERO_HALLUCINATION',
-        },
         paymentGateway: {
           status: 'OPERATIONAL',
           providers: ['Razorpay India (UPI/Cards/Netbanking)', 'Global Multi-Currency Abstraction'],
@@ -61,8 +56,6 @@ export class ObservabilityService {
       inventorySlotsTracked: 14200,
       dailyBookingsCount: 312,
       dailyGmvInr: 1248000,
-      aiRequestsProcessedToday: 4890,
-      aiGroundingAccuracyPct: 99.4,
     };
   }
 }

@@ -306,26 +306,6 @@ Trip
 | Analytics & Reports | Detailed platform analytics, export reports | V1 |
 | Configuration | Platform settings (commission rates, policies, feature flags) | V1 |
 
-### Module 12 — Future AI Layer
-
-**Purpose:** Define conceptual AI-powered features for future development phases.
-
-> **Status:** FUTURE — Not part of MVP or V1. Defined here for architectural awareness only.
-
-| Concept | Description | Phase |
-|---|---|---|
-| AI Trip Planner | Generate itinerary suggestions based on interests, budget, duration | Future |
-| AI Packing Assistant | Personalized packing recommendations based on activities + weather + dates | Future |
-| Conversational Travel Q&A | Chat-based interface for destination/activity questions | Future |
-| Smart Recommendations | Personalized activity/stay recommendations based on user behavior | Future |
-| Budget Optimizer | Suggest alternative combinations to fit budget constraints | Future |
-| Review Summarization | AI-generated summary of reviews for quick insights | Future |
-| Dynamic Pricing Suggestions | Help providers optimize pricing based on demand | Future |
-
-**Architectural Implication:** The data model and API structure should accommodate recommendation inputs (user preferences, booking history, viewed items) even if the AI layer isn't built yet. This avoids retrofitting later.
-
----
-
 ## 12. User Journeys
 
 ### Journey A — Discover Destination
@@ -854,8 +834,6 @@ TripJugaadu
 | Coupon/promo codes | V2 | Marketing feature, not core |
 | Property comparison | V2 | Enhancement, not core |
 | Collaborative trip planning | Future | Complex real-time sync |
-| AI trip planner | Future | Requires ML infrastructure |
-| AI packing assistant | Future | Requires training data |
 | Mobile application | Future | Web-first strategy |
 | Social features | Future | Not core to value prop |
 | Loyalty program | Future | Requires scale |
@@ -915,7 +893,6 @@ TripJugaadu
 | Notifications | Medium | Medium | Medium | Depends on Booking | Low | **SHOULD HAVE** |
 | Coupon System | Medium | Medium | Medium | Depends on Checkout | Low | **COULD HAVE** |
 | Comparison Feature | Medium | Low | Medium | Depends on Listings | Low | **COULD HAVE** |
-| AI Trip Planner | High | High | Very High | Depends on ML infra | Low | **FUTURE** |
 | Collaborative Planning | High | Medium | Very High | Depends on Trip Builder | Low | **FUTURE** |
 | Mobile App | High | High | Very High | Depends on stable web app | Low | **FUTURE** |
 

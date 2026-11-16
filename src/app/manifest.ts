@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'TripJugaadu — Autonomous Indian Travel Ecosystem',
+    name: 'TripJugaadu — Indian Travel Ecosystem',
     short_name: 'TripJugaadu',
     description: "Discover India's most incredible destinations, adventures, and experiences with offline expedition intelligence.",
     start_url: '/',

@@ -846,13 +846,13 @@ function ExploreContent() {
         <div className="p-8 md:p-12 rounded-2xl bg-gradient-to-r from-blue-950/70 via-slate-900/80 to-cyan-950/70 border border-cyan-500/30 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl shadow-cyan-950/40">
           <div className="max-w-xl text-center md:text-left">
             <span className="text-xs uppercase font-bold tracking-widest text-cyan-400 block mb-2">
-              Autonomous Trip Architect
+              Build Your Trip
             </span>
             <h3 className="font-display text-3xl md:text-5xl text-white mb-3">
               CRAFT YOUR TAILORED EXPEDITION
             </h3>
             <p className="text-sm text-white/70 leading-relaxed">
-              Mix and match high-altitude treks, white-water runs, and boutique mountain retreats. Generate ready-to-book itineraries in seconds.
+              Mix and match high-altitude treks, white-water runs, and boutique mountain retreats to create your own itinerary.
             </p>
           </div>
 

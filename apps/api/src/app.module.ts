@@ -14,7 +14,6 @@ import { ProvidersModule } from './modules/providers/providers.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { CouponsModule } from './modules/coupons/coupons.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
-import { AiModule } from './modules/ai/ai.module.js';
 import { CurrencyModule } from './modules/currency/currency.module.js';
 import { FinanceModule } from './modules/finance/finance.module.js';
 import { PartnerModule } from './modules/partner/partner.module.js';
@@ -36,7 +35,6 @@ import { CorrelationMiddleware } from './modules/observability/correlation.middl
     AdminModule,
     CouponsModule,
     PaymentsModule,
-    AiModule,
     CurrencyModule,
     FinanceModule,
     PartnerModule,
